@@ -10,7 +10,6 @@
         let r = await f.json();
         let l = localStorage.getItem("epidemic_simulator_settings");
         r.options.showspeed = 1;
-        r.options.optimization = 1;
         if (l) {
           let s = JSON.parse(l);
           if (navigator.vibrate && s.vibrate) r.options.vibrate = s.vibrate;

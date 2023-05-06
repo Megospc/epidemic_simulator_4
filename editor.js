@@ -1,4 +1,4 @@
-const version = "4.0.0";
+const version = "4.0.4";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -254,8 +254,7 @@ var options = {
   botspeed: 2,
   botzone: 5,
   botprob: 0.05,
-  bottime: 5000,
-  optimization: 1
+  bottime: 5000
 };
 var openedadd = [];
 var openedaddopt = false;

@@ -25,15 +25,6 @@ class Cell { //основной класс
     this.speedc = 1;
     this.type = "cell";
     this.landscape();
-    if (options.optimization == 1) { //оптимизация типа 1
-      this.opt = [];
-      for (let i = 0; i < states.length; i++) {
-        if (i) {
-          this.opt[i] = opt.length;
-          opt[i].push(this);
-        }
-      }
-    }
     
     //обновление счётчика:
     counter.cells++;
@@ -62,17 +53,13 @@ class Cell { //основной класс
         }
         this.st.allone = true;
       }
-      if (options.optimization == 1) { //оптимизация типа 1
-        this.opt[this.state] = opt[this.state].length;
-        opt[this.state].push(this);
-      }
+      
       this.state = state;
       this.time = timeNow();
       this.frame = frame;
       this.st = states[state];
       this.infect = this.st.infect ? this.st.infect-1:this.state;
       
-      if (options.optimization == 1) opt[state].slice(this.opt[state], 1); //оптимизация типа 1
       this.st.count.cells++; //обновление счётчика
       
       if (this.st.teleporto && !init) { //свойство "телепорт"
@@ -174,11 +161,10 @@ class Cell { //основной класс
       else this.relived = true; //уже пытался "возродиться"
     }
     
-    let list = options.optimization == 1 ? opt[this.state]:arr; //оптимизация типа 1
     if ((this.infectable || (this.st.magnet && this.st.magnetpow && this.alive) || (this.st.parasite && this.alive) || this.st.scary) && this.frame !== frame) { //проверка "заражения"
       let inzone = 0; //счётчик клеток в зоне заражения
-      for (let i = 0; i < list.length; i++) { //проверка всех клеток
-        let p = list[i];
+      for (let i = 0; i < arr.length; i++) { //проверка всех клеток
+        let p = arr[i];
         if (p.state != this.infect && p.state != this.state && p.alive && (!this.st.group || this.st.group != p.st.group)) { //проверка "не мой ли это друг?"
           if (p.type == "cell" && this.st.magnet && this.st.magnetpow && p.x >= this.x-this.st.magnet && p.x <= this.x+this.st.magnet && p.y >= this.y-this.st.magnet && p.y <= this.y+this.st.magnet) { //свойство "магнит"
             let c = (this.st.magnet-Math.sqrt(((this.x-p.x)**2)+((this.y-p.y)**2)))/this.st.magnet; //расстояние
@@ -1097,12 +1083,6 @@ function start() { //метод инициализации
   robots = [];
   stats = [];
   events = [];
-  opt = [];
-  if (options.optimization) { //оптимизация типа 1
-    for (let i = 0; i < states.length; i++) {
-      opt[i] = [];
-    }
-  }
   frame = 0;
   randomed = 0;
   heals = 0;

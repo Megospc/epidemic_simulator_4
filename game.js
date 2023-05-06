@@ -1,4 +1,4 @@
-const version = "4.0.0"; //версия программы
+const version = "4.0.4"; //версия программы
 const fps = 30; //количество кадров в игровой секунде
 const lands = [ //массив цветов ландшафтов
   "#000000", //без ландшафта [0]
@@ -54,8 +54,7 @@ var json;
       "count": 1000,
       "size": 420,
       "speed": 7,
-      "music": true,
-      "optimization": 1
+      "music": true
     },
     "style": {
       "size": 5, 
@@ -72,7 +71,7 @@ var json;
 var cw, ch, cc, cx, cy, interval; //характеристики холста и интервал
 var canvas = document.getElementById('canvas'); //DOM холста
 var ctx = canvas.getContext('2d'); //контекст холста
-var arr = [], counts = [], mosq = [], sorted = [], stats = [], robots = [], opt = []; //массивы
+var arr = [], counts = [], mosq = [], sorted = [], stats = [], robots = []; //массивы
 var lastTime = 0, frame = 0, date = 0, randomed = 0, heals = 0; //счётчики и другое
 var obj = JSON.parse(json); //объект симуляции
 var states = obj.states, options = obj.options, style = obj.style; //быстрый доступ к полям объекта
@@ -97,6 +96,7 @@ options.botspeed ??= 2;
 options.botzone ??= 5;
 options.botprob ??= 0.05;
 options.bottime ??= 5000;
+
 
 stats.push({ perf: performance.now(), sum: options.count }); //сохранение первого кадра
 
