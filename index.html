@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=700px, user-scalable=yes">
+  <title>Симулятор Эпидемии 4 - редактор</title>
+  <link rel="icon" href="assets/icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body id="body">
+  <div id="editor">
+    <div id="top">
+      <div><input type="text" id="name" value="без имени" onchange="window.name = this.value;">
+      <button onclick="lssg();" id="lssg"><img src="assets/lssg.svg" height="15"></button></div>
+      <button onclick="playgame();" id="play"><div><img src="assets/play.svg" height="10"></div>запуск</button>
+      <button onclick="downloadgame();" id="save"><div><img src="assets/download.svg" height="10"></div>скачать</button>
+      <button onclick="window.open('help.html');" id="help"><div><img src="assets/help.svg" height="10"></div>помощь</button>
+      <button onclick="$('opengame').style.display='block'; $('editor').style.display='none';" id="open"><div><img src="assets/open.svg" height="10"></div>открыть</button>
+    </div>
+    <div style="margin-top: 10px;"><b class="header">Настройки:</b></div>
+    <div id="options">
+      <div><label for="count" class="label">Количество клеток:</label>
+      <input type="number" id="count" value="1000" onchange="checknum(this, checksum(window.states.length), 10000, true); window.options.count = Number(this.value); testCount();"><b id="countwarn" class="label" style="color: #a00000;"></b></div>
+      <div><label for="speed" class="label">Максимальная скорость:</label>
+      <input type="number" id="speed" value="7" onchange="checknum(this, 1, 10, false); window.options.speed = Number(this.value);"></div>
+      <div><label for="size" class="label">Размер поля:</label>
+      <input type="number" id="size" value="420" onchange="checknum(this, 210, 1400, false); window.options.size = Number(this.value); updateStates();"></div>
+      <div class="ex_cells"><label for="ratcount" class="label">Количество крыс:</label>
+      <input type="number" id="ratcount" class="excells" value="0" onchange="checknum(this, 0, 1000, true); window.options.ratcount = Number(this.value);"></div>
+      <div class="ex_cells"><label for="ratspeed" class="label">Максимальная скорость крыс:</label>
+      <input type="number" id="ratspeed" class="excells" value="7" onchange="checknum(this, 1, 10, true); window.options.ratspeed = Number(this.value);"></div>
+      <div class="ex_cells"><label for="ballcount" class="label">Количество шаров:</label>
+      <input type="number" id="ballcount" class="excells" value="0" onchange="checknum(this, 0, 1000, true); window.options.ballcount = Number(this.value);"></div>
+      <div class="ex_cells"><label for="balljump" class="label">Упругость шаров(%):</label>
+      <input type="number" id="balljump" class="excells" value="80" onchange="checknum(this, 0, 100, false); window.options.balljump = Number(this.value)/100;"></div>
+      <div><label for="quar" class="label">Карантин:</label>
+      <input type="number" id="quar" value="0" onchange="checknum(this, 0, options.size, true); window.options.quar = Number(this.value);"></div>
+      <div class="ex_cells"><label for="mosquitospeed" class="label">Скорость москита:</label>
+      <input type="number" id="mosquitospeed" class="excells" value="7" onchange="checknum(this, 1, 10, true); window.options.mosquitospeed = Number(this.value);"></div>
+      <div class="ex_cells"><label for="mosquitoprob" class="label">Вероятность москита:</label>
+      <input type="number" id="mosquitoprob" class="excells" value="50" onchange="checknum(this, 0, 100, false); window.options.mosquitoprob = Number(this.value)/100; updateStates();"></div>
+      <div class="ex_cells"><label for="mosquitotime" class="label">Время москита:</label>
+      <input type="number" id="mosquitotime" class="excells" value="3" onchange="checknum(this, 0, 120, false); window.options.mosquitotime = Number(this.value)*1000; updateStates();"></div>
+      <div class="ex_cells"><label for="mosquitozone" class="label">Зона москита:</label>
+      <input type="number" id="mosquitozone" class="excells" value="1" onchange="checknum(this, 0, 420, false); window.options.mosquitozone = Number(this.value); updateStates();"></div>
+      <div class="ex_cells"><label for="mosquitospeed" class="label">Скорость роботов:</label>
+      <input type="number" id="botspeed" class="excells" value="2" onchange="checknum(this, 1, 10, true); window.options.botspeed = Number(this.value);"></div>
+      <div class="ex_cells"><label for="mosquitoprob" class="label">Вероятность роботов:</label>
+      <input type="number" id="botprob" class="excells" value="5" onchange="checknum(this, 0, 100, false); window.options.botoprob = Number(this.value)/100; updateStates();"></div>
+      <div class="ex_cells"><label for="bottime" class="label">Время поломки роботов:</label>
+      <input type="number" id="bottime" class="excells" value="5" onchange="checknum(this, 0, 120, false); window.options.bottime = Number(this.value)*1000; updateStates();"></div>
+      <div class="ex_cells"><label for="botzone" class="label">Зона роботов:</label>
+      <input type="number" id="botzone" class="excells" value="5" onchange="checknum(this, 0, 420, false); window.options.botzone = Number(this.value); updateStates();"></div>
+      <div><label for="landres" class="label">Разрешение ландшафта:</label>
+      <input type="number" id="landres" value="7" onchange="checknum(this, 3, 20, true); landResCh();"></div>
+      <div><label for="healzone" class="label">Зона излечения кликом:</label>
+      <input type="number" id="healzone" value="30" onchange="checknum(this, 0, options.size, false); window.options.healzone = Number(this.value);"></div>
+      <div><label for="healto" class="label">Излечение кликом в:</label>
+      <select id="healto" class="pselect" onchange="window.options.healto = Number(this.value)-2;"></select></div>
+      <div class="ex_cells"><label for="gravx" class="label">Гравитация X:</label>
+      <input type="number" id="gravx" class="excells" value="0" onchange="checknum(this, -5, 5, false); window.options.grav.x = Number(this.value);"></div>
+      <div class="ex_cells"><label for="gravy" class="label">Гравитация Y:</label>
+      <input type="number" id="gravy" class="excells" value="3" onchange="checknum(this, -5, 5, false); window.options.grav.y = Number(this.value);"></div>
+      <div><button onclick="$('extensionsdiv').style.display='block'; $('editor').style.display='none';" class="extensions">дополнения</button></div>
+      <p class="add" onclick="addopt();">Дополнительно <img src="assets/down.svg" id="addopt_" width="12"></p>
+      <div id="addopt" style="display: none;">
+        <div id="resolution">
+          <p class="label">Разрешение: </p>
+          <p class="label" id="resshow">1800р </p>
+          <button id="res900" onclick="options.resolution = 900; $('resshow').innerHTML='900р '; saveSets();" class="resolution">900р (×1)</button>
+          <button id="res1800" onclick="options.resolution = 1800; $('resshow').innerHTML='1800р '; saveSets();" class="resolution">1800р (×2)</button>
+          <button id="res2700" onclick="options.resolution = 2700; $('resshow').innerHTML='2700р '; saveSets();" class="resolution">2700р (×3)</button>
+          <button id="res3600" onclick="options.resolution = 3600; $('resshow').innerHTML='3600р '; saveSets();" class="resolution">3600р (×4)</button>
+        </div>
+        <div id="speed">
+          <p class="label">Скорость показа: </p>
+          <p class="label">x</p>
+          <input type="number" style="width: 40px;" onchange="checknum(this, 0.01, 10, false); window.options.showspeed = Number(this.value);" id="speedshow" value="1">
+          <button id="speed_0.1" onclick="window.options.showspeed = 0.1; $('speedshow').value = 0.1;" class="speed">x0.1</button>
+          <button id="speed_0.2" onclick="window.options.showspeed = 0.2; $('speedshow').value = 0.2;" class="speed">x0.2</button>
+          <button id="speed_0.5" onclick="window.options.showspeed = 0.5; $('speedshow').value = 0.5;" class="speed">x0.5</button>
+          <button id="speed_1" onclick="window.options.showspeed = 1; $('speedshow').value = 1;" class="speed">x1</button>
+          <button id="speed_2" onclick="window.options.showspeed = 2; $('speedshow').value = 2;" class="speed">x2</button>
+          <button id="speed_5" onclick="window.options.showspeed = 5; $('speedshow').value = 5;" class="speed">x5</button>
+        </div>
+        <div><input type="checkbox" id="music" onchange="window.options.music = this.checked; saveSets();" checked>
+        <label for="music" class="label">Музыка</label>
+        <button id="musictype" onclick="musictype();"></button></div>
+        <div id="vibratediv" style="display: none;"><input type="checkbox" id="vibrate" onchange="window.options.vibrate = this.checked; saveSets();">
+        <label for="vibrate" class="label">Вибрации</label></div>
+        <div><input type="checkbox" id="turbo" onchange="window.options.turbo = this.checked;">
+        <label for="turbo" class="label">Турбо-режим</label></div>
+        <div><input type="checkbox" id="biggraph" onchange="window.options.biggraph = this.checked; saveSets();">
+        <label for="biggraph" class="label">Большой график</label></div>
+        <div><input type="checkbox" id="graphmove" onchange="window.options.graphmove = this.checked; saveSets();">
+        <label for="graphmove" class="label">Сдвиг графика</label></div>
+        <div><p id="tosource" onclick="sessionStorage.setItem('epidemic_simulator_source', createJSON(2)); window.open('source.html');">Исходный код <img src="assets/source.svg" height="5"></p></div>
+        <div><div><label for="description" class="label">Описание:</label></div>
+        <textarea id="description" onchange="window.description = this.value;"></textarea></div>
+      </div>
+      <div id="landscapediv">
+        <p class="label">Ландшафт:</p>
+        <div>
+          <div id="landscapes"></div>
+          <div>
+            <input type="number" id="landpow" onchange="checknum(this, 0, 100, true);" value="10">
+            <b class="label" id="landsel">без ландшафта</b>
+          </div>
+        </div>
+        <canvas id="landscape" height="450" width="450"></canvas>
+      </div>
+    </div>
+    <div style="margin-top: 10px;"><b class="header">События:</b></div>
+    <button style="margin-top: 10px;" id="newevent" onclick="newevent();">+ новое</button>
+    <div id="events"></div>
+    <div style="margin-top: 10px;"><b class="header">Состояния клеток:</b></div>
+    <button style="margin-top: 10px;" id="newstate" onclick="newState('без имени', '#000000');">+ новое</button>
+    <div id="states"></div>
+  </div>
+  <div id="opengame" style="display: none;">
+    <div><button onclick="$('opengame').style.display='none'; $('editor').style.display='block';" id="back">назад</button></div>
+    <div><button onclick="lsog();" id="lsog">загрузить точку сохранения</button></div>
+    <div><input type="file" id="file" onchange="opengame(this.files[0]);"></div>
+    <div><textarea id="console" readonly></textarea></div>
+  </div>
+  <div id="extensionsdiv" style="display: none;">
+    <div><button onclick="$('extensionsdiv').style.display='none'; $('editor').style.display='block';" id="back">назад</button></div>
+  </div>
+</body>
+</html>
+<script src="editor.js"></script>
