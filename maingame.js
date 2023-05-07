@@ -140,6 +140,7 @@ class Cell { //основной класс
         this.frame = frame;
         this.x = random(options.size-style.size)+(style.size/2);
         this.y = random(options.size-style.size)+(style.size/2);
+        this.landscape();
       } //"научная зона"
       
       if (this.st.time && this.time+this.st.time <= timeNow()) this.timeend(); //обработка "срока жизни"
@@ -311,7 +312,7 @@ class Cell { //основной класс
         fill(0.75, 0.75, 0.8, this.x, this.y, this.st.color + ahex(cellTrans/3*(style.anim ? Math.sin(degToRad(frame*30))+1:1)));
       } else {
         if (style.dots) { //отрисовка "следов"
-          ctx.fillStyle = (style.dots.color == "ill" ? this.st.color:style.dots.color) + (style.dots.transparent ? ahex(cellTrans-80):"");
+          ctx.fillStyle = (style.dots.color == "ill" ? this.st.color:style.dots.color) + ahex((style.dots.transparent ? cellTrans-80:255)*(this.land.type == 21 ? 1-this.land.pow:1)*(this.z == 0 ? 1:0.5));
           ctx.fillRect(X(this.x*scale+15-(style.dots.size/2)), Y(this.y*scale+15-(style.dots.size/2)), X(style.dots.size*scale), Y(style.dots.size*scale));
         }
       }

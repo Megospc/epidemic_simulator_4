@@ -1,4 +1,4 @@
-const version = "4.0.4";
+const version = "4.0.10";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -313,7 +313,7 @@ $('landscape').addEventListener('click', (e) => {
   let r = e.target.getBoundingClientRect();
   let x = (e.clientX-r.left)/160*450-15;
   let y = (e.clientY-r.top)/160*450-15;
-  let px = options.size/landscape.res;
+  let px = 420/landscape.res;
   if (x > 0 && y > 0 && x < 420 && y < 420) {
     x = Math.floor(x/px);
     y = Math.floor(y/px);
@@ -885,8 +885,8 @@ function readgame(json) {
               }
               if (i != 0 && st.position) {
                 $(`pos${i}`).checked = true;
-                $(`x${i}`).value = Math.floor(((st.position[0].x ?? 210)-2.5)/((options.size-5)/200))-100;
-                $(`y${i}`).value = Math.floor(((st.position[0].y ?? 210)-2.5)/((options.size-5)/200))-100;
+                $(`x${i}`).value = Math.floor(((st.position[0].x ?? obj.options.size/2)-2.5)/(obj.options.size-5)*200-100);
+                $(`y${i}`).value = Math.floor(((st.position[0].y ?? obj.options.size/2)-2.5)/(obj.options.size-5)*200-100);
               }
               updateState(i);
             }
