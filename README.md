@@ -4,7 +4,7 @@
 
 Версия: **4.2.8** *(09.05.2023)*
 
-Запустить можно [тут ![](https://megospc.github.io/epidemic_simulator/assets/icon.svg "icon.svg")](https://megospc.github.io/epidemic_simulator_3 "GitHub Pages").
+Запустить можно [тут ![](https://megospc.github.io/epidemic_simulator/assets/icon.svg "icon.svg")](https://megospc.github.io/epidemic_simulator_4 "GitHub Pages").
 
 ## Особенности:
 - [x] события
