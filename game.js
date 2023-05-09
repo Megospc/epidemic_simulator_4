@@ -1,4 +1,4 @@
-const version = "4.1.14"; //версия программы
+const version = "4.2.8"; //версия программы
 const fps = 30; //количество кадров в игровой секунде
 const lands = [ //массив цветов ландшафтов
   "#000000", //без ландшафта [0]
@@ -91,12 +91,18 @@ style.ratsize ??= 5;
 options.ratspeed ??= 7;
 style.ballsize ??= 5;
 options.balljump ??= 0.8;
-style.botsize ??= 75
+style.botsize ??= 5;
 style.botcolor ??= "#808080";
 options.botspeed ??= 2;
 options.botzone ??= 5;
 options.botprob ??= 0.05;
 options.bottime ??= 5000;
+style.catsize ??= 5;
+style.catcolor ??= "#a08000";
+options.catspeed ??= 2;
+options.catzone ??= 5;
+options.catprob ??= 0.05;
+options.cattime ??= 5000;
 
 
 stats.push({ perf: performance.now(), sum: options.count }); //сохранение первого кадра
@@ -499,7 +505,7 @@ event.robots = function(e) {
     for (let x = 0; x < landscape.res; x++) {
       for (let y = 0; y < landscape.res; y++) {
         if (landscape.type[x][y] == 25) {
-          for (let i = 0; i < Math.floor(landscape.pow[x][y]*e.count); i++) robots.push(new Robot(robots.length, x*px+random(px), y*px+random(px)));
+          for (let i = 0; i < Math.floor(landscape.pow[x][y]*e.count); i++) spec.push(new Robot(spec.length, x*px+random(px), y*px+random(px)));
         }
       }
     }

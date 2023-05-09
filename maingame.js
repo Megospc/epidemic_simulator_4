@@ -673,7 +673,7 @@ class Ball { //класс "шара"
   end() {}  //метод конца обработки (пока не нужен)
 }
 
-class Robot {
+class Robot { //класс робота
   constructor(id, x, y) {
     //инициализация:
     this.x = x;
@@ -709,10 +709,10 @@ class Robot {
     
       let home = { minx: style.botsize/2, miny: style.botsize/2, maxx: options.size-(style.botsize/2), maxy: options.size-(style.botsize/2) };
       //проверка касания края:
-      if (this.x < home.minx) this.speed.x *=-options.balljump, this.x = home.minx;
-      if (this.x > home.maxx) this.speed.x *=-options.balljump, this.x = home.maxx;
-      if (this.y < home.miny) this.speed.y *=-options.balljump, this.y = home.miny;
-      if (this.y > home.maxy) this.speed.y *=-options.balljump, this.y = home.maxy;
+      if (this.x < home.minx) this.speed.x *=-1, this.x = home.minx;
+      if (this.x > home.maxx) this.speed.x *=-1, this.x = home.maxx;
+      if (this.y < home.miny) this.speed.y *=-1, this.y = home.miny;
+      if (this.y > home.maxy) this.speed.y *=-1, this.y = home.maxy;
     }
   }
   render() { //метод отрисовки
@@ -738,6 +738,76 @@ class Robot {
       }
     }
   }
+  first() {} //метод пре-отрисовки (пока не нужен)
+  end() {}  //метод конца обработки (пока не нужен)
+}
+
+class Cat { //класс кота
+  constructor(id, x, y) {
+    //инициализация:
+    this.x = x ?? random(options.size-style.catsize)+(style.catsize/2);
+    this.y = y ?? random(options.size-style.catsize)+(style.catsize/2);
+    this.speed = { x: options.catspeed*(random(options.catspeed*2)-options.catspeed), y: options.catspeed*(random(options.catspeed*2)-options.catspeed) };
+    this.id = id;
+    this.time = timeNow();
+    this.frame = false;
+    this.alive = true;
+    this.type = "cat";
+  }
+  dead() { //метод "смерти"
+    if (this.alive) {
+      this.alive = false;
+      this.time = timeNow();
+      this.frame = frame;
+    }
+  }
+  handler() { //метод обработчика
+    if (this.alive) {
+      for (let i = 0; i < arr.length; i++) { //проверка других клеток
+        let p = arr[i];
+        if (p.type == "rat" && p.x <= this.x+options.catzone && p.x >= this.x-options.catzone && p.y <= this.y+options.catzone && p.y >= this.y-options.catzone) { //проверка зоны
+          if (rnd() < options.catprob && rnd() >= (p.st.protect ?? 0)) p.dead();
+        }
+      }
+    
+      //движение:
+      this.x += this.speed.x;
+      this.y += this.speed.y;
+    
+      let home = { minx: style.catsize/2, miny: style.catsize/2, maxx: options.size-(style.catsize/2), maxy: options.size-(style.catsize/2) };
+      //проверка касания края:
+      if (this.x < home.minx) this.speed.x *=-1, this.x = home.minx;
+      if (this.x > home.maxx) this.speed.x *=-1, this.x = home.maxx;
+      if (this.y < home.miny) this.speed.y *=-1, this.y = home.miny;
+      if (this.y > home.maxy) this.speed.y *=-1, this.y = home.maxy;
+    }
+  }
+  render() { //метод отрисовки
+    let fig = function(obj, size) {
+      ctx.beginPath();
+      ctx.moveTo(X(obj.x*scale+15), Y((obj.y-style.botsize/2*size)*scale+15));
+      ctx.lineTo(X((obj.x+style.botsize/2*size)*scale+15), Y(obj.y*scale+15));
+      ctx.lineTo(X((obj.x+style.botsize*0.3*size)*scale+15), Y((obj.y+style.botsize/2*size)*scale+15));
+      ctx.lineTo(X((obj.x-style.botsize*0.3*size)*scale+15), Y((obj.y+style.botsize/2*size)*scale+15));
+      ctx.lineTo(X((obj.x-style.botsize/2*size)*scale+15), Y(obj.y*scale+15));
+      ctx.closePath();
+      ctx.fill();
+    };
+    if (this.alive) {
+      ctx.fillStyle = style.catcolor;
+      fig(this, 1);
+    } else {
+      if (frame < this.frame+15 && style.deadanim) { //отрисовка "смерти"
+        let fram = frame-this.frame;
+        let size = fram/7.5+1;
+        let trans = 255*(1-fram/15);
+        ctx.fillStyle = style.catcolor + ahex(trans);
+        fig(this, size);
+      }
+    }
+  }
+  first() {} //метод пре-отрисовки (пока не нужен)
+  end() {}  //метод конца обработки (пока не нужен)
 }
 
 function frame_() { //метод обработки и отрисовки кадра
@@ -1121,8 +1191,9 @@ function start() { //метод инициализации
     for (let k = 0; k < ill.ballinit; k++, j++, balls++) arr.push(new Ball(j, null, null, i));
   }
   for (let i = arr.length; cells < options.count; i++, cells++) arr.push(new Cell(i));
-  for (let i = arr.length; rats < options.ratcount; i++, rats++)arr.push(new Rat(i));
-  for (let i = arr.length; balls < options.ballcount; i++, balls++)  arr.push(new Ball(i));
+  for (let i = arr.length; rats < options.ratcount; i++, rats++) arr.push(new Rat(i));
+  for (let i = arr.length; balls < options.ballcount; i++, balls++) arr.push(new Ball(i));
+  for (let i = 0; i < options.catcount; i++) spec.push(new Cat(spec.length));
   
   sort();
 }

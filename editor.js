@@ -1,4 +1,4 @@
-const version = "4.1.4";
+const version = "4.2.8";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -134,6 +134,10 @@ var setdef = new Map([
   ["botzone", 5],
   ["botprob", 5],
   ["bottime", 5],
+  ["catspeed", 2],
+  ["catzone", 5],
+  ["catprob", 5],
+  ["catcount", 0],
   ["gravx", 0],
   ["gravy", 3]
 ]);
@@ -193,6 +197,7 @@ const extensionlist = [
 - москиты
 - шары
 - роботы
+- коты
 `, color: "#80f080" },
   { id: "deads", name: "Смерти", info: `Ландшафты:
 - взрывоопасная зона
@@ -260,7 +265,11 @@ var options = {
   botzone: 5,
   botprob: 0.05,
   bottime: 5000,
-  food: 100
+  food: 100,
+  catspeed: 2,
+  catzone: 5,
+  catprob: 0.05,
+  catcount: 0
 };
 var openedadd = [];
 var openedaddopt = false;
@@ -446,7 +455,9 @@ function createJSON(space) {
       ratsize: 5,
       ballsize: 5,
       botsize: 5,
-      botcolor: "#808080"
+      botcolor: "#808080",
+      catsize: 5,
+      catcolor: "#a08000"
     }
   };
   for (let i = 0; i < states.length; i++) {
@@ -904,7 +915,6 @@ function readgame(json) {
                 $(`x${i}`).value = Math.floor(((st.position[0].x ?? obj.options.size/2)-2.5)/(obj.options.size-5)*200-100);
                 $(`y${i}`).value = Math.floor(((st.position[0].y ?? obj.options.size/2)-2.5)/(obj.options.size-5)*200-100);
               }
-              updateState(i);
             }
             for (let i = 0; i < sels.length; i++) $(sels[i].id).value = sels[i].val;
             $('events').innerHTML = "";
@@ -942,9 +952,10 @@ function readgame(json) {
             $('name').value = name;
             description = obj.description ?? "";
             $('description').value = description;
+            let onc = [];
             function setval(id, val) {
               $(id).value = val;
-              $(id).onchange();
+              onc.push(`$('${id}').onchange();`);
               if (val != setdef.get(id) && typeof setdef.get(id) != 'undefined') {
                 let ex = $(id).className;
                 if (ex) {
@@ -971,10 +982,19 @@ function readgame(json) {
             setval('ratspeed', obj.options.ratspeed ?? 7);
             setval('ballcount', obj.options.ballcount ?? 0);
             setval('balljump', (obj.options.balljump ?? 0.8)*100);
-            obj.options.gravitation = obj.options.gravitation ?? {};
+            setval('botspeed', obj.options.botspeed ?? 2);
+            setval('botprob', (obj.options.botprob ?? 0.05)*100);
+            setval('botzone', obj.options.botzone ?? 5);
+            setval('bottime', (obj.options.bottime ?? 5000)/1000);
+            setval('catspeed', obj.options.catspeed ?? 2);
+            setval('catprob', (obj.options.catprob ?? 0.05)*100);
+            setval('catzone', obj.options.catzone ?? 5);
+            setval('catcount', obj.options.catcount ?? 0);
+            obj.options.gravitation ??= {};
             setval('gravx', obj.options.gravitation.x ?? 0);
             setval('gravy', obj.options.gravitation.y ?? 3);
             setval('food', obj.options.food ?? 100);
+            for (let i = 0; i < onc.length; i++) eval(onc[i]);
             landscape = {
               type: obj.landscape.type,
               pow: obj.landscape.pow,
@@ -982,6 +1002,7 @@ function readgame(json) {
             };
             $('landres').value = landscape.res;
             landrender();
+            updateStates();
             log("Загрузка завершена");
             updateStates();
             setTimeout(() => { $('opengame').style.display='none'; $('editor').style.display='block'; }, 500);

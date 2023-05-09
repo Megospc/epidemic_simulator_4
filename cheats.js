@@ -183,22 +183,28 @@ function cheat(str) {
               break;
             case "rat": {
             	let s = num(2, { up: states.length-1, down: 0, flr: true }, false);
-                let x = num(3, { up: options.size-(style.size/2), down: style.size/2 }, false);
-                let y = num(4, { up: options.size-(style.size/2), down: style.size/2 }, false);
+                let x = num(3, { up: options.size-(style.ratsize/2), down: style.ratsize/2 }, false);
+                let y = num(4, { up: options.size-(style.ratsize/2), down: style.ratsize/2 }, false);
                 arr.push(new Rat(arr.length, x.ok ? x.n:null, y.ok ? y.n:null, s.ok ? s.n:0));
               }
               break;
             case "ball": {
             	let s = num(2, { up: states.length-1, down: 0, flr: true }, false);
-                let x = num(3, { up: options.size-(style.size/2), down: style.size/2 }, false);
-                let y = num(4, { up: options.size-(style.size/2), down: style.size/2 }, false);
+                let x = num(3, { up: options.size-(style.ballsize/2), down: style.ballsize/2 }, false);
+                let y = num(4, { up: options.size-(style.ballsize/2), down: style.ballsize/2 }, false);
                 arr.push(new Ball(arr.length, x.ok ? x.n:null, y.ok ? y.n:null, s.ok ? s.n:0));
               }
               break;
             case "robot": {
-                let x = num(3, { up: options.size-(style.size/2), down: style.size/2 }, false);
-                let y = num(4, { up: options.size-(style.size/2), down: style.size/2 }, false);
-                if (x.ok && y.ok) robots.push(new Robot(arr.length, x.n, y.n));
+                let x = num(2, { up: options.size-(style.botsize/2), down: style.botsize/2 }, false);
+                let y = num(3, { up: options.size-(style.botsize/2), down: style.botsize/2 }, false);
+                if (x.ok && y.ok) spec.push(new Robot(spec.length, x.n, y.n));
+              }
+              break;
+            case "cat": {
+                let x = num(2, { up: options.size-(style.catsize/2), down: style.catsize/2 }, false);
+                let y = num(3, { up: options.size-(style.catsize/2), down: style.catsize/2 }, false);
+                if (x.ok && y.ok) spec.push(new Cat(spec.length, x.n, y.n));
               }
               break;
             case "state": {

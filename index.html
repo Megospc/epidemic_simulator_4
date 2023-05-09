@@ -38,19 +38,27 @@
       <div class="ex_cells"><label for="mosquitospeed" class="label">Скорость москита:</label>
       <input type="number" id="mosquitospeed" class="excells" value="7" onchange="checknum(this, 1, 10, true); window.options.mosquitospeed = Number(this.value);"></div>
       <div class="ex_cells"><label for="mosquitoprob" class="label">Вероятность москита:</label>
-      <input type="number" id="mosquitoprob" class="excells" value="50" onchange="checknum(this, 0, 100, false); window.options.mosquitoprob = Number(this.value)/100; updateStates();"></div>
+      <input type="number" id="mosquitoprob" class="excells" value="50" onchange="checknum(this, 0, 100, false); window.options.mosquitoprob = Number(this.value)/100;"></div>
       <div class="ex_cells"><label for="mosquitotime" class="label">Время москита:</label>
-      <input type="number" id="mosquitotime" class="excells" value="3" onchange="checknum(this, 0, 120, false); window.options.mosquitotime = Number(this.value)*1000; updateStates();"></div>
+      <input type="number" id="mosquitotime" class="excells" value="3" onchange="checknum(this, 0, 120, false); window.options.mosquitotime = Number(this.value)*1000;"></div>
       <div class="ex_cells"><label for="mosquitozone" class="label">Зона москита:</label>
-      <input type="number" id="mosquitozone" class="excells" value="1" onchange="checknum(this, 0, 420, false); window.options.mosquitozone = Number(this.value); updateStates();"></div>
-      <div class="ex_cells"><label for="mosquitospeed" class="label">Скорость роботов:</label>
+      <input type="number" id="mosquitozone" class="excells" value="1" onchange="checknum(this, 0, 420, false); window.options.mosquitozone = Number(this.value);"></div>
+      <div class="ex_cells"><label for="botspeed" class="label">Скорость роботов:</label>
       <input type="number" id="botspeed" class="excells" value="2" onchange="checknum(this, 1, 10, true); window.options.botspeed = Number(this.value);"></div>
-      <div class="ex_cells"><label for="mosquitoprob" class="label">Вероятность роботов:</label>
-      <input type="number" id="botprob" class="excells" value="5" onchange="checknum(this, 0, 100, false); window.options.botoprob = Number(this.value)/100; updateStates();"></div>
+      <div class="ex_cells"><label for="botprob" class="label">Вероятность роботов:</label>
+      <input type="number" id="botprob" class="excells" value="5" onchange="checknum(this, 0, 100, false); window.options.botoprob = Number(this.value)/100;"></div>
       <div class="ex_cells"><label for="bottime" class="label">Время поломки роботов:</label>
-      <input type="number" id="bottime" class="excells" value="5" onchange="checknum(this, 0, 120, false); window.options.bottime = Number(this.value)*1000; updateStates();"></div>
+      <input type="number" id="bottime" class="excells" value="5" onchange="checknum(this, 0, 120, false); window.options.bottime = Number(this.value)*1000;"></div>
       <div class="ex_cells"><label for="botzone" class="label">Зона роботов:</label>
-      <input type="number" id="botzone" class="excells" value="5" onchange="checknum(this, 0, 420, false); window.options.botzone = Number(this.value); updateStates();"></div>
+      <input type="number" id="botzone" class="excells" value="5" onchange="checknum(this, 0, window.options.size, false); window.options.botzone = Number(this.value);"></div>
+      <div class="ex_cells"><label for="catcount" class="label">Количество котов:</label>
+      <input type="number" id="catcount" class="excells" value="0" onchange="checknum(this, 0, 100, true); window.options.catcount = Number(this.value);"></div>
+      <div class="ex_cells"><label for="catspeed" class="label">Скорость котов:</label>
+      <input type="number" id="catspeed" class="excells" value="2" onchange="checknum(this, 1, 10, true); window.options.catspeed = Number(this.value);"></div>
+      <div class="ex_cells"><label for="catprob" class="label">Вероятность котов:</label>
+      <input type="number" id="catprob" class="excells" value="5" onchange="checknum(this, 0, 100, false); window.options.catprob = Number(this.value)/100;"></div>
+      <div class="ex_cells"><label for="catzone" class="label">Зона котов:</label>
+      <input type="number" id="catzone" class="excells" value="5" onchange="checknum(this, 0, window.options.size, false); window.options.botzone = Number(this.value);"></div>
       <div><label for="landres" class="label">Разрешение ландшафта:</label>
       <input type="number" id="landres" value="7" onchange="checknum(this, 3, 20, true); landResCh();"></div>
       <div><label for="healzone" class="label">Зона излечения кликом:</label>

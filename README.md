@@ -2,7 +2,7 @@
 ### **Добро пожаловать в «Симулятор Эпидемии 4»!**
 **«Симулятор Эпидемии»** — это модель представляющая взаимодействие болезний друг с другом.
 
-Версия: **4.1.4** *(09.05.2023)*
+Версия: **4.2.8** *(09.05.2023)*
 
 Запустить можно [тут ![](https://megospc.github.io/epidemic_simulator/assets/icon.svg "icon.svg")](https://megospc.github.io/epidemic_simulator_3 "GitHub Pages").
 
@@ -19,9 +19,11 @@
 - [x] расширенная палитра цветов
 - [x] события 2-ого уровня
 - [x] события 1-ого уровня
+- [x] чит-коды
 - [x] крысы
 - [x] шары
 - [x] роботы
+- [x] коты
 
 ## Предыдущие версии:
 <u>**1.0.0** (06.02.2023)</u>
@@ -67,3 +69,5 @@
 [**3.13.7** (21.02.2023)](https://github.com/Megospc/epidemic_simulator_3 "GitHub")[![](https://megospc.github.io/epidemic_simulator/assets/icon.svg "icon.svg")](https://megospc.github.io/epidemic_simulator_3 "GitHub Pages")
 
 <u>**4.0.10** (07.05.2023)</u>
+
+<u>**4.1.4** (09.05.2023)</u>
