@@ -434,7 +434,7 @@ function cheat(str) {
           o = num(1);
           if (o.ok) {
             options.showspeed = o.n;
-            goalFPS = fps*n, fpsTime = 1000/goalFPS;
+            goalFPS = fps*o.n, fpsTime = 1000/goalFPS;
           }
           break;
         case "resolution":

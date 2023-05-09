@@ -1,4 +1,4 @@
-const version = "4.0.10"; //версия программы
+const version = "4.1.14"; //версия программы
 const fps = 30; //количество кадров в игровой секунде
 const lands = [ //массив цветов ландшафтов
   "#000000", //без ландшафта [0]
@@ -26,7 +26,8 @@ const lands = [ //массив цветов ландшафтов
   "#404080", //трёхмерная зона [22]
   "#007030", //лесная зона [23]
   "#003820", //жуткая зона [24]
-  "#a05040" //фабричная зона [25]
+  "#a05040", //фабричная зона [25]
+  "#a08050" //магазинная зона [26]
 ];
 
 //получение JSON симуляции:
@@ -71,7 +72,7 @@ var json;
 var cw, ch, cc, cx, cy, interval; //характеристики холста и интервал
 var canvas = document.getElementById('canvas'); //DOM холста
 var ctx = canvas.getContext('2d'); //контекст холста
-var arr = [], counts = [], mosq = [], sorted = [], stats = [], robots = []; //массивы
+var arr = [], counts = [], spec = [], sorted = [], stats = []; //массивы
 var lastTime = 0, frame = 0, date = 0, randomed = 0, heals = 0; //счётчики и другое
 var obj = JSON.parse(json); //объект симуляции
 var states = obj.states, options = obj.options, style = obj.style; //быстрый доступ к полям объекта
@@ -503,4 +504,8 @@ event.robots = function(e) {
       }
     }
   }
+};
+event.show = function(e) { //событие "показ"
+  vib(50);
+  event.showed = timeNow()+e.duration;
 };

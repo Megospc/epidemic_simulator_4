@@ -26,11 +26,11 @@
       <div><label for="size" class="label">Размер поля:</label>
       <input type="number" id="size" value="420" onchange="checknum(this, 210, 1400, false); window.options.size = Number(this.value); updateStates();"></div>
       <div class="ex_cells"><label for="ratcount" class="label">Количество крыс:</label>
-      <input type="number" id="ratcount" class="excells" value="0" onchange="checknum(this, 0, 1000, true); window.options.ratcount = Number(this.value);"></div>
+      <input type="number" id="ratcount" class="excells" value="0" onchange="checknum(this, ratsum(window.states.length), 1000, true); window.options.ratcount = Number(this.value);"></div>
       <div class="ex_cells"><label for="ratspeed" class="label">Максимальная скорость крыс:</label>
       <input type="number" id="ratspeed" class="excells" value="7" onchange="checknum(this, 1, 10, true); window.options.ratspeed = Number(this.value);"></div>
       <div class="ex_cells"><label for="ballcount" class="label">Количество шаров:</label>
-      <input type="number" id="ballcount" class="excells" value="0" onchange="checknum(this, 0, 1000, true); window.options.ballcount = Number(this.value);"></div>
+      <input type="number" id="ballcount" class="excells" value="0" onchange="checknum(this, ballsum(window.states.length), 1000, true); window.options.ballcount = Number(this.value);"></div>
       <div class="ex_cells"><label for="balljump" class="label">Упругость шаров(%):</label>
       <input type="number" id="balljump" class="excells" value="80" onchange="checknum(this, 0, 100, false); window.options.balljump = Number(this.value)/100;"></div>
       <div><label for="quar" class="label">Карантин:</label>
@@ -57,6 +57,8 @@
       <input type="number" id="healzone" value="30" onchange="checknum(this, 0, options.size, false); window.options.healzone = Number(this.value);"></div>
       <div><label for="healto" class="label">Излечение кликом в:</label>
       <select id="healto" class="pselect" onchange="window.options.healto = Number(this.value)-2;"></select></div>
+      <div><label for="food" class="label">Еда:</label>
+      <input type="number" id="food" value="100" onchange="checknum(this, 10, 1000, false); window.options.food = Number(this.value);"></div>
       <div class="ex_cells"><label for="gravx" class="label">Гравитация X:</label>
       <input type="number" id="gravx" class="excells" value="0" onchange="checknum(this, -5, 5, false); window.options.grav.x = Number(this.value);"></div>
       <div class="ex_cells"><label for="gravy" class="label">Гравитация Y:</label>

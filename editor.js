@@ -1,4 +1,4 @@
-const version = "4.0.10";
+const version = "4.1.4";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -25,7 +25,8 @@ const lands = [
   { color: "#404080", bcolor: "#303070", name: "трёхмерная зона", ext: "move" },
   { color: "#007030", bcolor: "#006020", name: "лесная зона", ext: "cells" },
   { color: "#003820", bcolor: "#003018", name: "жуткая зона", ext: "deads" },
-  { color: "#a05040", bcolor: "#904030", name: "фабричная зона", ext: "cells" }
+  { color: "#a05040", bcolor: "#904030", name: "фабричная зона", ext: "cells" },
+  { color: "#a08050", bcolor: "#907040", name: "магазинная зона" }
 ];
 const eventlist = [
   { name: "землетрясение", id: "teleporto", props: [], ext: "move" },
@@ -72,7 +73,10 @@ const eventlist = [
   { name: "хэллоуин", id: "helloween", props: [], ext: "deads" },
   { name: "производство", id: "robots", props: [
     { id: "count", text: "количество:", check: [0, 10, false], form: "${num}", aform: "${num}" }
-  ], ext: "cells" }
+  ], ext: "cells" },
+  { name: "показ", id: "show", props: [
+    { id: "duration", text: "длительность:", check: [0, 120, false], form: "${num}*1000", aform: "${num}/1000" }
+  ] }
 ];
 const props = [
   { title: "Коэффициент скорости:", type: "num", id: "speed", check: [0, 3, false], default: 1, form: "${num}", aform: "${num}", ext: "move" },
@@ -106,6 +110,7 @@ const props = [
   { title: "Уязвимость (%):", type: "num", id: "defect", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "attack" },
   { title: "Остановка (%):", type: "num", id: "stopping", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "move" },
   { title: "Ядовитое (%):", type: "num", id: "potion", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "deads" },
+  { title: "Затраты (шт.):", type: "num", id: "eats", check: [0, 10, false], default: 0, form: "${num}", aform: "${num}" },
   { title: "Грабитель", type: "chk", id: "robber", default: false },
   { title: "Все за одного", type: "chk", id: "allone", default: false, ext: "deads" },
   { title: "Невидимка", type: "chk", id: "invisible", default: false },
@@ -254,7 +259,8 @@ var options = {
   botspeed: 2,
   botzone: 5,
   botprob: 0.05,
-  bottime: 5000
+  bottime: 5000,
+  food: 100
 };
 var openedadd = [];
 var openedaddopt = false;
@@ -724,7 +730,17 @@ function copystate(i) {
   }
   let cs = states[i];
   let num = states.length;
-  let ns = newState(cs.name + " копия", cs.color);
+  let nums = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+  let str = "";
+  let wstr = "";
+  for (let i = cs.name.length-1; i >= 0; i--) {
+    if (nums.includes(cs.name[i])) str = cs.name[i] + str;
+    else wstr = cs.name[i] + wstr;
+  }
+  let name = cs.name;
+  if (str.length) name = wstr+(Number(str)+1);
+  else name += " копия";
+  let ns = newState(name, cs.color);
   i = ns.num;
   $(`hiddenstat${i}`).checked = !(cs.hiddenstat ?? false);
   $(`hiddengraph${i}`).checked = !(cs.hiddengraph ?? false);
@@ -958,6 +974,7 @@ function readgame(json) {
             obj.options.gravitation = obj.options.gravitation ?? {};
             setval('gravx', obj.options.gravitation.x ?? 0);
             setval('gravy', obj.options.gravitation.y ?? 3);
+            setval('food', obj.options.food ?? 100);
             landscape = {
               type: obj.landscape.type,
               pow: obj.landscape.pow,
