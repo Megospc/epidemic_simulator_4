@@ -188,8 +188,11 @@ class Cell { //основной класс
                   p.dead();
                 } else {
               	if (!event.quared) {
-                    if (rnd() < p.st.potion) this.dead();
-                    p.toState(this.infect);
+              	  if (rnd() < p.st.potion) this.dead();
+                    if (this.st.magic > rnd()) {
+                      p.dead();
+                      arr[i] = new Rat(i, p.x, p.y, this.state); //свойство "волшебство"
+                    } else p.toState(this.infect);
                   }
                 }
                 for (let i = 0; i < this.st.farinf; i++) arr[Math.floor(random(arr.length))].toState(this.state); //свойство "дальняя атака"
@@ -421,7 +424,6 @@ class Rat { //класс "крысы"
     this.infect = this.st.infect ?? this.state;
     this.infectable = this.st.zone && this.st.prob;
     this.type = "rat";
-    if (state) this.toState(state);
     
     //обновление счётчика:
     counter.special++;
@@ -556,7 +558,6 @@ class Ball { //класс "шара"
     this.infect = this.st.infect ?? this.state;
     this.infectable = this.st.zone && this.st.prob;
     this.type = "ball";
-    if (state) this.toState(state);
     
     //обновление счётчика:
     counter.special++;
@@ -597,7 +598,7 @@ class Ball { //класс "шара"
     }
   }
   handler() { //метод обработчика
-    if (this.land.type == 8 && this.land.pow > rnd()) this.dead(); //ландшафт "охотничья зона"
+    if (this.alive && this.land.type == 8 && this.land.pow > rnd()) this.dead(); //ландшафт "охотничья зона"
     if (this.alive && this.land.type == 15 && this.land.pow > rnd()) {
         this.dead();
         arr[this.id] = new Cell(this.id, this.x, this.y, this.state);
@@ -753,6 +754,7 @@ class Cat { //класс кота
     this.frame = false;
     this.alive = true;
     this.type = "cat";
+    this.landscape();
   }
   dead() { //метод "смерти"
     if (this.alive) {
@@ -762,6 +764,7 @@ class Cat { //класс кота
     }
   }
   handler() { //метод обработчика
+    if (this.alive && this.land.type == 8 && this.land.pow > rnd()) this.dead(); //ландшафт "охотничья зона"
     if (this.alive) {
       for (let i = 0; i < arr.length; i++) { //проверка других клеток
         let p = arr[i];
@@ -780,6 +783,7 @@ class Cat { //класс кота
       if (this.x > home.maxx) this.speed.x *=-1, this.x = home.maxx;
       if (this.y < home.miny) this.speed.y *=-1, this.y = home.miny;
       if (this.y > home.maxy) this.speed.y *=-1, this.y = home.maxy;
+      this.landscape();
     }
   }
   render() { //метод отрисовки
@@ -805,6 +809,12 @@ class Cat { //класс кота
         fig(this, size);
       }
     }
+  }
+  landscape() { //метод проверки ландшафта
+    let px = options.size/landscape.res;
+    this.land = { x: Math.floor(this.x/px), y: Math.floor(this.y/px) };
+    this.land.type = landscape.type[this.land.x][this.land.y];
+    this.land.pow = landscape.pow[this.land.x][this.land.y];
   }
   first() {} //метод пре-отрисовки (пока не нужен)
   end() {}  //метод конца обработки (пока не нужен)

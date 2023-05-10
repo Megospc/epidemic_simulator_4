@@ -1,4 +1,4 @@
-const version = "4.2.8"; //версия программы
+const version = "4.3.3"; //версия программы
 const fps = 30; //количество кадров в игровой секунде
 const lands = [ //массив цветов ландшафтов
   "#000000", //без ландшафта [0]
@@ -514,4 +514,10 @@ event.robots = function(e) {
 event.show = function(e) { //событие "показ"
   vib(50);
   event.showed = timeNow()+e.duration;
+};
+event.eloff = function(e) { //событие "отключение электричества"
+  vib(50);
+  for (let i = 0; i < spec.length; i++) {
+    if (spec[i].type == "robot") spec[i].dead();
+  }
 };

@@ -1,4 +1,4 @@
-const version = "4.2.8";
+const version = "4.3.3";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -76,7 +76,8 @@ const eventlist = [
   ], ext: "cells" },
   { name: "показ", id: "show", props: [
     { id: "duration", text: "длительность:", check: [0, 120, false], form: "${num}*1000", aform: "${num}/1000" }
-  ] }
+  ] },
+  { name: "поломка", id: "eloff", props: [], ext: "cells" }
 ];
 const props = [
   { title: "Коэффициент скорости:", type: "num", id: "speed", check: [0, 3, false], default: 1, form: "${num}", aform: "${num}", ext: "move" },
@@ -111,6 +112,7 @@ const props = [
   { title: "Остановка (%):", type: "num", id: "stopping", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "move" },
   { title: "Ядовитое (%):", type: "num", id: "potion", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "deads" },
   { title: "Затраты (шт.):", type: "num", id: "eats", check: [0, 10, false], default: 0, form: "${num}", aform: "${num}" },
+  { title: "Волшебство (%):", type: "num", id: "magic", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "cells" },
   { title: "Грабитель", type: "chk", id: "robber", default: false },
   { title: "Все за одного", type: "chk", id: "allone", default: false, ext: "deads" },
   { title: "Невидимка", type: "chk", id: "invisible", default: false },
