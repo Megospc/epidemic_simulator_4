@@ -1,5 +1,12 @@
 <!DOCTYPE html>
-<!--<script>{let e=()=>{};!sessionStorage.getItem("reload")&&localStorage.getItem("reload")&&(sessionStorage.setItem("reload","true"),e=()=>location.reload()),localStorage.setItem("reload","true"),e()}</script>-->
+<script>{
+  let f = () => {};
+  if (!sessionStorage.getItem("reload") && localStorage.getItem("reload")) {
+    sessionStorage.setItem("reload", 'true');
+    f = () => location.reload();
+  }
+  localStorage.setItem("reload", 'true');
+}</script>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
