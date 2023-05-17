@@ -43,7 +43,7 @@ class Cell { //основной класс
     }
   }
   toState(state, init) { //метод перехода в другое состояние
-    if (this.alive) {
+    if (this.alive && !(this.state && !init && this.land.type == 27 && this.land.pow > rnd())) { //ландшафт "плесень"
       let laststate = this.st;
       this.st.count.cells--; //обновление счётчика
       
@@ -1140,8 +1140,9 @@ ${frames}`;
           if (options.healto == -2) {
             p.teleportated = { x: p.x, y: p.y, st: p.st, land: p.land };
             p.frame = frame;
-            p.x = random(zone*2)-zone+x_;
-            p.y = random(zone*2)-zone+y_;
+            const size = p.type == "rat" ? style.ratsize:(p.type == "ball" ? style.ballsize:style.size);
+            p.x = testCordMinMax(random(zone*2)-zone+x_, size);
+            p.y = testCordMinMax(random(zone*2)-zone+y_, size);
             p.landscape();
           } else { 
             if (options.healto == -1) p.dead();

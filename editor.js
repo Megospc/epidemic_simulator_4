@@ -1,4 +1,4 @@
-const version = "4.3.4";
+const version = "4.4.0";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -26,7 +26,8 @@ const lands = [
   { color: "#007030", bcolor: "#006020", name: "лесная зона", ext: "cells" },
   { color: "#003820", bcolor: "#003018", name: "жуткая зона", ext: "deads" },
   { color: "#a05040", bcolor: "#904030", name: "фабричная зона", ext: "cells" },
-  { color: "#a08050", bcolor: "#907040", name: "магазинная зона" }
+  { color: "#a08050", bcolor: "#907040", name: "магазинная зона" },
+  { color: "#004050", bcolor: "#003040", name: "плесень" }
 ];
 const eventlist = [
   { name: "землетрясение", id: "teleporto", props: [], ext: "move" },
