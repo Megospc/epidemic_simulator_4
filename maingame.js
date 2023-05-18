@@ -174,8 +174,28 @@ class Cell { //основной класс
           if (p.type == "cell" && this.st.magnet && this.st.magnetpow && p.x >= this.x-this.st.magnet && p.x <= this.x+this.st.magnet && p.y >= this.y-this.st.magnet && p.y <= this.y+this.st.magnet) { //свойство "магнит"
             let c = (this.st.magnet-Math.sqrt(((this.x-p.x)**2)+((this.y-p.y)**2)))/this.st.magnet; //расстояние
             p.magnet = p.magnet ?? { x: 0, y: 0 };
-            p.magnet.y += p.y < this.y ? this.st.magnetpow*c:-this.st.magnetpow*c;
-            p.magnet.x += p.x < this.x ? this.st.magnetpow*c:-this.st.magnetpow*c;
+            switch (this.st.magnettype ?? 0) { //свойство "тип магнита"
+              case 0: //"новый"
+                p.magnet.y += p.y < this.y ? this.st.magnetpow*c:-this.st.magnetpow*c;
+                p.magnet.x += p.x < this.x ? this.st.magnetpow*c:-this.st.magnetpow*c;
+                break;
+              case 1: //"только X"
+                p.magnet.x += p.x < this.x ? this.st.magnetpow*c:-this.st.magnetpow*c;
+                break;
+              case 2: //"только Y"
+                p.magnet.y += p.y < this.y ? this.st.magnetpow*c:-this.st.magnetpow*c;
+                break;
+              case 3: //"старый"
+                p.magnet.y += p.y < this.y ? this.st.magnetpow:-this.st.magnetpow;
+                p.magnet.x += p.x < this.x ? this.st.magnetpow:-this.st.magnetpow;
+                break;
+              case 4: //"старый X"
+                p.magnet.x += p.x < this.x ? this.st.magnetpow:-this.st.magnetpow;
+                break;
+              case 5: //"старый Y"
+                p.magnet.y += p.y < this.y ? this.st.magnetpow:-this.st.magnetpow;
+                break;
+            }
           }
           if (this.land.type == 24 && this.land.x == p.land.x && this.land.y == p.land.y && this.land.pow > rnd() && !p.st.brave && this.st.scary) p.dead(); //ландшафт "жуткая зона" и свойство "страшный"
           if (((this.land.type == 3 && this.land.pow > rnd() && p.land.type == 3 && p.type == "cell") /* ландшафт "зона биологической опасности" */ || (this.x-this.st.zone <= p.x && this.x+this.st.zone >= p.x && this.y-this.st.zone <= p.y && this.y+this.st.zone >= p.y)) && ! (this.land.type == 14 && this.land.pow > rnd() && p.land.type == 14 && p.type == "cell") /* ландшафт "зона строгого контроля" */ && (this.z == p.z || this.st.thirdmetric || p.type != "cell")/* третье измерение */) { //проверка зоны заражения

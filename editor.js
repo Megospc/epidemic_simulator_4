@@ -1,4 +1,4 @@
-const version = "4.4.0";
+const version = "4.5.4";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -94,6 +94,7 @@ const props = [
   { title: "Убийца (%):", type: "num", id: "killer", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "attack"},
   { title: "Зона магнита (пкс.):", type: "num", id: "magnet", check: [0, 420, false], default: 0, form: "${num}", aform: "${num}", ext: "move" },
   { title: "Сила магнита:", type: "num", id: "magnetpow", check: [0, 12, false], default: 0, form: "${num}", aform: "${num}", ext: "move" },
+  { title: "Тип магнита:", type: "sel", id: "magnettype", select: "arr = ['новый', 'только X', 'только Y', 'старый', 'старый X', 'старый Y'];", check: [0, 12, false], default: 0, form: "${num}", aform: "${num}", ext: "move" },
   { title: "Добавка - время (с):", type: "num", id: "addtime", check: [0, 120, false], default: 0, form: "${num}*1000", aform: "${num}/1000", firstno: true },
   { title: "Добавка - количество (шт.):", type: "num", id: "addcount", check: [0, 20, true], default: 0, form: "${num}", aform: "${num}", firstno: true },
   { title: "Количество добавок (0 = бесконечно):", type: "num", id: "countadd", check: [0, 50, true], default: 0, form: "${num}", aform: "${num}", firstno: true },
@@ -781,18 +782,17 @@ function opengame(file) {
     readgame(reader.result);
   };
   reader.onerror = function() {
-    log("Ошибка при чтении файла: " + reader.error);
+    log("Ошибка при чтении файла");
   };
 }
 function readgame(json) {
   let log = (txt) => $('console').value += txt+"\n";
   log("Файл обрабатывается...");
-  let obj = null;
+  let obj = false;
   try {
     obj = JSON.parse(json);
   } catch(e) {
     log(`Ошибка: ${e.message}`);
-    obj = false;
   }
   if (typeof obj == "object") {
     log("JSON прочитан, идёт проверка объекта...");
@@ -866,7 +866,7 @@ function readgame(json) {
               }
               if (ver.length == 3) {
                 if (ver[0] > 4) {
-                  log("Ошибка: версия фаила выше версии редактора");
+                  log("Ошибка: версия файла выше версии редактора");
                   log("Попробуйте:");
                   log(`https://megospc.github.io/epidemic_simulator_${ver[0]}/`);
                   return;

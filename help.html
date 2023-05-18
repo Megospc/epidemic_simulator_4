@@ -299,5 +299,12 @@
   <p id="sourcep" onclick="window.open('source.html');">Исходный код <img src="assets/source.svg" height="5"></p>
   <p id="aboutp" onclick="window.open('about.html');">О программе</p>
   <p id="logsp" onclick="window.open('logs.html');">Просмотр логов</p>
+  <p id="cache" onclick="cache();" style="display: none; font-size: 5px; color: #f0f0f0;">Офлайн-версия (тестировка)</p>
 </body>
 </html>
+<script>
+  if ('serviceWorker' in navigator) document.getElementById('cache').style.display = 'block';
+  function cache() {
+    if (confirm("Офлайн-версия займёт ≈5мб памяти вашего устройства. Продолжить?")) navigator.serviceWorker.register('cache.js').then(() => navigator.serviceWorker.ready.then(e => e.sync.register('syncdata'))).catch(e => alert("Произошла ошибка: " + e.message));
+  }
+</script>

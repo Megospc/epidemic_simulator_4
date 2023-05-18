@@ -445,7 +445,7 @@ function cheat(str) {
           break;
         case "resolution":
           o = num(1, { up: 8, down: 1 });
-          if (o.ok) options.showspeed = Math.floor(o.n)*900;
+          if (o.ok) style.resolution = Math.floor(o.n)*900;
           break;
         case "event":
           n = string(1);
@@ -458,7 +458,7 @@ function cheat(str) {
           res(options.showspeed);
           break;
         case "resolution?":
-          res(options.resolution);
+          res(style.resolution);
           break;
         default:
           err(`Команда '${keys[0]}' не найдена.`);
