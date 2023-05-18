@@ -114,7 +114,7 @@ class Cell { //основной класс
         }
         if (this.st.mosquito) { //свойство "москиты"
           for (let i = 0; i < this.st.mosquito; i++) {
-            mosq.push(new Mosquito(mosq.length, this.x, this.y, this.state));
+            spec.push(new Mosquito(spec.length, this.x, this.y, this.state));
           }
         }
       }
@@ -380,7 +380,7 @@ class  Mosquito { //класс "москита"
       ctx.fillStyle = this.st.color + ahex(trans);
       ctx.fillRect(X(testCordMinMax(this.x-(style.mosquitosize/2)+x_, style.mosquitosize)*scale+15), Y(testCordMinMax(this.y-(style.mosquitosize/2)+y_, style.mosquitosize)*scale+15), X(style.mosquitosize*scale), Y(style.mosquitosize*scale));
       ctx.fillStyle = this.st.color + ahex(trans/2);
-      ctx.fillRect(X((this.x+x_-style.mosquitosize)*scale+15), Y((this.y-style.mosquitosize+y_)*scale+15), X(style.mosquitosize*2*scale), Y(style.mosquitosize*2)); 
+      ctx.fillRect(X((this.x+x_-style.mosquitosize)*scale+15), Y((this.y-style.mosquitosize+y_)*scale+15), X(style.mosquitosize*2*scale), Y(style.mosquitosize*2*scale)); 
     }
   }
   handler() { //метод обработчика

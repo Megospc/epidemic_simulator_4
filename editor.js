@@ -542,6 +542,7 @@ function newState(name, color) {
     <input type="color" id="color${num}" class="colorsel" value="${color}">
     ${colorpal}
     <button class="color" style="background-color: #000000; border-color: #202020;" onclick="$('color${num}').value='#000000'; updateStates();"></button>
+    <button class="color" style="background-color: #808080; border-color: #707070;" onclick="$('color${num}').value='#808080'; updateStates();"></button>
     <div><input type="checkbox" id="transparent${num}" onchange="updateStates()">
     <label for="transparent${num}" class="label">Полупрозрачность</label></div>
     <div><label for="prob${num}" class="label">Вероятность (%):</label>
@@ -748,13 +749,17 @@ function copystate(i) {
   let nums = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
   let str = "";
   let wstr = "";
+  let b = true;
   for (let i = cs.name.length-1; i >= 0; i--) {
-    if (nums.includes(cs.name[i])) str = cs.name[i] + str;
-    else wstr = cs.name[i] + wstr;
+    if (nums.includes(cs.name[i]) && b) str = cs.name[i] + str;
+    else {
+      wstr = cs.name[i] + wstr;
+      b = false;
+    }
   }
   let name = cs.name;
   if (str.length) name = wstr+(Number(str)+1);
-  else name += " копия";
+  else name += " 2";
   let ns = newState(name, cs.color);
   i = ns.num;
   $(`hiddenstat${i}`).checked = !(cs.hiddenstat ?? false);

@@ -284,6 +284,7 @@ function biggraph() { //отрисовка большого графика
       }
     }
   }
+  ctx.lineCap = "butt";
   ctx.font = `${X(12)}px Monospace`;
   ctx.fillStyle = colors.back;
   ctx.fillRect(X(465), Y(15), X(420), Y(210));
@@ -339,6 +340,7 @@ function graph() {
       }
     }
   }
+  ctx.lineCap = "butt";
   ctx.font = `${X(9)}px Monospace`;
   ctx.fillStyle = colors.elements;
   ctx.fillRect(X(685), Y(20), X(165), Y(1));
