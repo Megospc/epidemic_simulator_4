@@ -1211,7 +1211,7 @@ function start() { //метод инициализации
 
 start(); //инициализация
 
-addEventListener('click', () => { //стартовый клик
+document.addEventListener('click', () => { //стартовый клик
   vib(100);
   date = Date.now();
   music.loop = true;
