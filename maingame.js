@@ -1,11 +1,8 @@
 class Cell { //основной класс
   constructor(id, x, y, state) {
-    //установка позиции:
-    this.x = x ?? random(options.size-style.size)+(style.size/2);
-    this.y = y ?? random(options.size-style.size)+(style.size/2);
-    this.z = 0;
-    
-    this.speed = { x: random(options.speed)-(options.speed/2), y: random(options.speed)-(options.speed/2) }; //установка скорости
+    this.initPos(x, y);
+    this.initSpeed();
+    this.initHome();
     
     //инициализация:
     this.state = 0; 
@@ -13,39 +10,64 @@ class Cell { //основной класс
     this.id = id;
     this.time = timeNow();
     this.st = states[0];
-    this.infectable = false;
     this.frame = 0;
     this.teleportated = false;
     this.magnet = null;
     this.magneted = false;
-    this.infect = this.st.infect ?? this.state;
-    this.infectable = this.st.zone && this.st.prob;
     this.parasitetime = false;
     this.relived = false;
     this.speedc = 1;
     this.food = options.food ?? 0;
     this.type = "cell";
+    this.isInfectable();
     this.landscape();
-    
-    //обновление счётчика:
-    counter.cells++;
-    this.st.count.cells++;
+    this.counterAdd(true);
     
     if (state) this.toState(state, true);
-    
-    { //установка "дома"
-      let shome = { minx: style.size/2, miny: style.size/2, maxx: options.size-(style.size/2), maxy: options.size-(style.size/2) };
-      if (options.quar) {
-        this.home = { minx: Math.max(style.size/2, this.x-options.quar), miny: Math.max(style.size/2, this.y-options.quar), maxx: Math.min(options.size-(style.size/2), this.x+options.quar), maxy: Math.min(options.size-(style.size/2), this.y+options.quar) };
-      } else {
-        this.home = shome;
-      }
-    }
+  }
+  initPos(x, y, z) { //установка позиции
+    this.x = x ?? random(options.size-style.size)+(style.size/2);
+    this.y = y ?? random(options.size-style.size)+(style.size/2);
+    this.z = z ?? 0;
+  }
+  initSpeed() { //установка скорости
+    this.speed = { x: random(options.speed)-(options.speed/2), y: random(options.speed)-(options.speed/2) };
+  }
+  initHome(full) { //установка "дома"
+    if (options.quar && !full) this.home = { minx: Math.max(style.size/2, this.x-options.quar), miny: Math.max(style.size/2, this.y-options.quar), maxx: Math.min(options.size-(style.size/2), this.x+options.quar), maxy: Math.min(options.size-(style.size/2), this.y+options.quar) };
+    else this.home = { minx: style.size/2, miny: style.size/2, maxx: options.size-(style.size/2), maxy: options.size-(style.size/2) };
+  }
+  isInfectable() {
+    this.infect = this.st.infect ? this.st.infect-1:this.state;
+    this.infectable = this.st.zone && this.st.prob;
+  }
+  counterAdd(birth) { //обновление счётчика
+    if (birth) counter.cells++;
+    this.st.count.cells++;
+  }
+  counterMin(dead) { //обновление счётчика
+    if (dead) counter.cells--;
+    this.st.count.cells--;
+  }
+  teleporto(fx, fy, sx, sy, st, size) { //телепортация
+    size ??= style.size;
+    let trans = this.trans();
+    this.frame = frame;
+    this.teleportated = { st: st ?? this.st, x: this.x, y: this.y, land: Object.assign({}, this.land), trans: () => trans };
+    this.x = testCordMinMax(random(sx-fx)+fx, size);
+    this.y = testCordMinMax(random(sy-fy)+fy, size);
+    this.landscape();
+  }
+  lnd(i, c) {
+    return this.land.type == i && this.land.type/(c ?? 1) > rnd();
+  }
+  isEvent() {
+    return this.st.antievnt <= rnd();
   }
   toState(state, init) { //метод перехода в другое состояние
-    if (this.alive && !(this.state && !init && this.land.type == 27 && this.land.pow > rnd())) { //ландшафт "плесень"
+    if (this.alive && !(this.state && !init && this.lnd(27))) { //ландшафт "плесень"
       let laststate = this.st;
-      this.st.count.cells--; //обновление счётчика
+      this.counterMin();
       
       if (this.st.allone) { //свойство "все за одного"
         this.st.allone = false;
@@ -59,42 +81,25 @@ class Cell { //основной класс
       this.time = timeNow();
       this.frame = frame;
       this.st = states[state];
-      this.infect = this.st.infect ? this.st.infect-1:this.state;
+      this.counterAdd();
       
-      this.st.count.cells++; //обновление счётчика
+      if (this.st.teleporto && !init) this.teleporto(this.x-this.st.teleporto, this.y-this.st.teleporto, this.x+this.st.teleporto, this.y+this.st.teleporto, laststate); //свойство "телепорт"
+      else this.teleportated = false;
       
-      if (this.st.teleporto && !init) { //свойство "телепорт"
-        this.teleportated = { st: laststate, x: this.x, y: this.y, land: this.land }
-        this.x = testCordMinMax(this.x+random(this.st.teleporto*2+1)-this.st.teleporto, style.size);
-        this.y = testCordMinMax(this.y+random(this.st.teleporto*2+1)-this.st.teleporto, style.size);
-      } else {
-        this.teleportated = false;
-      }
-      
-      if (this.st.prob && this.st.zone) { //свойство "отдых" и проверка зарожаимости
-        if (this.st.rest) {
-          this.restend = timeNow()+this.st.rest;
-          this.infectable = false;
-        } else {
-          this.infectable = true;
-        }
-      } else {
+      if (this.st.rest) { //свойство "отдых"
+        this.restend = timeNow()+this.st.rest;
         this.infectable = false;
-      }
+      } else this.isInfectable();
     }
   }
   timeend() {
-    if (rnd() <= this.st.heal) { //свойство "излечение"
-      this.toState(this.st.transform == -1 ? Math.floor(random(states.length)):(this.st.transform ?? 0)); 
-    } else {
-      this.dead();
-    }
+    if (rnd() <= this.st.heal) this.toState(this.st.transform == -1 ? Math.floor(random(states.length)):(this.st.transform ?? 0)); //свойство "излечение"
+    else this.dead();
   }
   dead() { //метод "смерти"
     if (this.alive) {
-      if (this.land.type == 11 && this.land.pow > rnd()) { //ландшафт "лагерь"
-        this.toState(0);
-      } else {
+      if (this.lnd(11)) this.toState(0); //ландшафт "лагерь"
+      else {
         //обновление:
         this.alive = false;
         this.time = timeNow();
@@ -102,49 +107,36 @@ class Cell { //основной класс
         
         if (!this.st.after) {
           this.infectable = false;
-          //обновление счётчика:
-          this.st.count.cells--;
-          counter.cells--;
+          this.counterMin(true);
         } else { //свойство "инфекция после смерти"
-          if (!this.infectable) {
-            //обновление счётчика:
-            this.st.count.cells--;
-            counter.cells--;
-          }
+          if (!this.infectable) this.counterMin(true);
         }
         if (this.st.mosquito) { //свойство "москиты"
-          for (let i = 0; i < this.st.mosquito; i++) {
-            spec.push(new Mosquito(spec.length, this.x, this.y, this.state));
-          }
+          for (let i = 0; i < this.st.mosquito; i++)  spec.push(new Mosquito(spec.length, this.x, this.y, this.state));
         }
       }
-      if (this.land.type == 6 && this.land.pow > rnd()) arr.push(new Rat(arr.length, this.x, this.y)); //ландшафт "свалка"
+      if (this.lnd(6)) arr.push(new Rat(arr.length, this.x, this.y)); //ландшафт "свалка"
     }
+  }
+  lands() { //обработка ландшафтов
+    if (this.lnd(1)) this.dead(); //"отравленная зона"
+    if (this.lnd(18) && event.dragoned) this.dead(); //"драконья зона"
+    if (this.lnd(12, this.st.builder ? 100:1)) this.dead(); //"строительная зона"
+    if (this.state && this.lnd(2)) this.toState(0); //"санитарная зона"
+    if (this.lnd(7) && this.st.allergy != -1) this.toState(this.st.allergy); //"аллергенная зона"
+    if (this.lnd(13)) {
+      this.dead();
+      arr[this.id] = new Rat(this.id, this.x, this.y, this.state);
+    } //"магическая зона"
+    if (this.lnd(9) && this.st.waterscary) this.dead(); //"морская зона"
+    if (this.lnd(10, 1000)) explosion(); //"взрывоопасная зона"
+    if (this.lnd(22) && event.ztime) this.z = event.z; //"трёхмерная зона"
+    if (this.lnd(16)) this.teleporto(0, options.size, 0, options.size); //"научная зона"
+    if (this.land.type == 26) this.food += this.land.pow*10; //"магазинная зона"
   }
   handler() { //метод обработчика
     if (this.alive) {
-      //обработка ландшафтов:
-      if (this.land.type == 1 && this.land.pow > rnd()) this.dead(); //"отравленная зона"
-      if (this.land.type == 18 && this.land.pow > rnd() && event.dragoned) this.dead(); //"драконья зона"
-      if (this.land.type == 12 && this.land.pow/(this.st.builder ? 100:1) > rnd()) this.dead(); //"строительная зона"
-      if (this.state && this.land.type == 2 && this.land.pow > rnd()) this.toState(0); //"санитарная зона"
-      if (this.land.type == 7 && this.land.pow > rnd() && this.st.allergy != -1) this.toState(this.st.allergy); //"аллергенная зона"
-      if (this.land.type == 13 && this.land.pow > rnd()) {
-        this.dead();
-        arr[this.id] = new Rat(this.id, this.x, this.y, this.state);
-      } //"магическая зона"
-      if (this.state && this.land.type == 9 && this.land.pow > rnd() && this.st.waterscary) this.dead(); //"морская зона"
-      if (this.land.type == 10 && this.land.pow/1000 > rnd()) explosion(); //"взрывоопасная зона"
-      if (this.land.type == 22 && this.land.pow > rnd() && event.ztime) this.z = event.z; //"трёхмерная зона"
-      if (this.land.type == 16 && this.land.pow > rnd()) {
-        this.teleportated = { st: this.st, x: this.x, y: this.y, land: this.land };
-        this.frame = frame;
-        this.x = random(options.size-style.size)+(style.size/2);
-        this.y = random(options.size-style.size)+(style.size/2);
-        this.landscape();
-      } //"научная зона"
-      if (this.land.type == 26) this.food += this.land.pow*10; //"магазинная зона"
-      
+      this.lands();
       if (this.st.time && this.time+this.st.time <= timeNow()) this.timeend(); //обработка "срока жизни"
       if (this.st.eats && options.food && this.land.type != 26) this.food -= this.st.eats; //свойство "затраты"
       if (options.food && this.food < 0) this.dead();
@@ -239,11 +231,9 @@ class Cell { //основной класс
   move() { //метод движения
     if (this.alive) {
       if (this.st.crazy/10 > rnd()) this.speed = { x: random(options.speed)-(options.speed/2), y: random(options.speed)-(options.speed/2) }; //свойство "сумасшедший"
+      let c = this.land.type == 4 ? 1-(this.land.pow):(this.land.type == 17 ? this.land.pow+1:1); //ландшафты "пляжная зона" и "ледяная зона"
       
-      let c = this.land.type == 4 ? 1-(this.land.pow):(this.land.type == 17 ? this.land.pow+1:1); //ландшафт "пляжная зона"
-      
-      if (this.st.robber && options.quar) this.home = { minx: Math.max(style.size/2, this.x-options.quar), miny: Math.max(style.size/2, this.y-options.quar), maxx: Math.min(options.size-(style.size/2), this.x+options.quar), maxy: Math.min(options.size-(style.size/2), this.y+options.quar) }; //свойство "грабитель"
-      
+      if (this.st.robber && options.quar) this.initHome(true); //свойство "грабитель"
       let home = Object.assign({}, this.home);
       
       if (!this.st.builder) { //свойство "строитель"
@@ -279,67 +269,52 @@ class Cell { //основной класс
       this.landscape();
     }
   }
+  trans() {
+    return (this.st.transparent ? 128:255)*(this.land.type == 21 && !event.showed ? 1-this.land.pow:1)*(this.z == 0 ? 1:0.5);
+  }
+  fig(size, f) {
+    f ??= x => x;
+    size ??= 1;
+    ctx.fillStyle = (this.st.color) + ahex(f(this.trans()));
+    ctx.fillRect(X((this.x-(style.size/2*size))*scale+15), Y((this.y-(style.size/2*size))*scale+15), X(style.size*size*scale), Y(style.size*size*scale));
+  }
   render() { //метод отрисовки на холсте
     if (!this.st.invisible) { //свойство "невидимка"
-      let cellTrans = (this.st.transparent ? 128:255)*(this.land.type == 21 && !event.showed ? 1-this.land.pow:1)*(this.z == 0 ? 1:0.5);
       if (this.alive) {
-        let f = function(o) {
-          ctx.fillStyle = o.st.color + ahex(cellTrans);
-          ctx.fillRect(X((o.x-(style.size/2))*scale+15), Y((o.y-(style.size/2))*scale+15), X(style.size*scale), Y(style.size*scale));
-        };
         if (this.teleportated) { //отрисовка "телепортации"
           if (frame < this.frame+5 && style.anim && this.frame !== false) {
-            let fram = frame-this.frame;
-            let trans = cellTrans*fram/5;
-            ctx.fillStyle = this.st.color + ahex(trans);
-            ctx.fillRect(X((this.x-(style.size/2))*scale+15), Y((this.y-(style.size/2))*scale+15), X(style.size*scale), Y(style.size*scale));
-            cellTrans = this.teleportated.st.transparent ? 128:255;
-            trans = cellTrans*fram/5;
-            ctx.fillStyle = this.teleportated.st.color + ahex((255-trans)*(this.teleportated.land.type == 21 ? 1-this.teleportated.land.pow:1)*(this.z == 0 ? 1:0.5));
-            ctx.fillRect(X(((this.teleportated.x-(style.size/2)))*scale+15), Y((this.teleportated.y-(style.size/2))*scale+15), X(style.size*scale), Y(style.size*scale));
-          } else f(this);
+            this.fig.call(this.teleportated, 1, x => 255-(x/5*(frame-this.frame)));
+            this.fig(1, x => x/5*(frame-this.frame));
+          } else this.fig();
         } else {
-          f(this);
-          if (this.magneted && style.anim) { //отрисовка "магнита"
-            let trans = (this.st.transparent ? 64:128)*(this.land.type == 21 && !event.showed ? 1-this.land.pow:1);
-            ctx.fillStyle = this.st.color + ahex(trans);
-            ctx.fillRect(X((this.x-(style.size))*scale+15), Y((this.y-(style.size))*scale+15), X(style.size*2*scale), Y(style.size*2*scale));
-          } else {
-            if (frame < this.frame+5 && style.chanim && this.frame !== false) { //отрисовка заражения
-              let fram = frame-this.frame;
-              let trans = ahex(cellTrans*(5-fram)/10);
-              let size = 2*style.size;              
-              ctx.fillStyle = this.st.color + trans;
-              ctx.fillRect(X((this.x-(size/2))*scale+15), Y((this.y-(size/2))*scale+15), X(size*scale), Y(size*scale));
-            }
+          this.fig();
+          if (this.magneted && style.anim) this.fig(2, x => x/2); //отрисовка "магнита"
+          else {
+            if (frame < this.frame+5 && style.chanim && this.frame !== false) this.fig(2, x => x*(5-frame+this.frame)/10); //отрисовка заражения
           }
         }
       } else {
         if (frame < this.frame+15 && style.deadanim) { //отрисовка "смерти"
           let fram = frame-this.frame;
-          let size = (fram/7.5+1)*style.size;
-          let trans = ahex(cellTrans*(15-fram)/15);
-          ctx.fillStyle = this.st.color + trans;
-          ctx.fillRect(X((this.x-(size/2))*scale+15), Y((this.y-(size/2))*scale+15), X(size*scale), Y(size*scale));
+          this.fig(fram/7.5+1, x => x*(15-fram)/15);
         }
       }
     }
   }
   first() { //метод пре-отрисовки (для элементов нижнего слоя)
     if (!this.alive) {
-      let cellTrans = (this.st.transparent ? 128:255)*(this.land.type == 21 && !event.showed ? 1-this.land.pow:1)*(this.z == 0 ? 1:0.5);
       if (this.infectable) { //отрисовка "инфекции после смерти"
         let fill = (x, y, s, x_, y_, c) => {
           ctx.fillStyle = c;
           ctx.fillRect(X((x_+(style.size*x))*scale+15), Y((y_+(style.size*y))*scale+15), X(s*style.size*scale), Y(s*style.size*scale));
         };
-        fill(-0.75, -0.75, 0.6, this.x, this.y, this.st.color + ahex(cellTrans/3*(style.anim ? Math.sin(degToRad(frame*30))+1:1)));
-        fill(0.75, -0.75, 1, this.x, this.y, this.st.color + ahex(cellTrans/3*(style.anim ? Math.sin(degToRad(frame*30+180))+1:1)));
-        fill(-0.75, 0.75, 1, this.x, this.y, this.st.color + ahex(cellTrans/3*(style.anim ? Math.sin(degToRad(frame*30+180))+1:1)));
-        fill(0.75, 0.75, 0.8, this.x, this.y, this.st.color + ahex(cellTrans/3*(style.anim ? Math.sin(degToRad(frame*30))+1:1)));
+        fill(-0.75, -0.75, 0.6, this.x, this.y, this.st.color + ahex(this.trans()/3*(style.anim ? Math.sin(degToRad(frame*30))+1:1)));
+        fill(0.75, -0.75, 1, this.x, this.y, this.st.color + ahex(this.trans()/3*(style.anim ? Math.sin(degToRad(frame*30+180))+1:1)));
+        fill(-0.75, 0.75, 1, this.x, this.y, this.st.color + ahex(this.trans()/3*(style.anim ? Math.sin(degToRad(frame*30+180))+1:1)));
+        fill(0.75, 0.75, 0.8, this.x, this.y, this.st.color + ahex(this.trans()/3*(style.anim ? Math.sin(degToRad(frame*30))+1:1)));
       } else {
         if (style.dots) { //отрисовка "следов"
-          ctx.fillStyle = (style.dots.color == "ill" ? this.st.color:style.dots.color) + ahex((style.dots.transparent ? cellTrans-80:255)*(this.land.type == 21 && !event.showed ? 1-this.land.pow:1)*(this.z == 0 ? 1:0.5));
+          ctx.fillStyle = (style.dots.color == "ill" ? this.st.color:style.dots.color) + ahex(this.trans()-80);
           ctx.fillRect(X(this.x*scale+15-(style.dots.size/2)), Y(this.y*scale+15-(style.dots.size/2)), X(style.dots.size*scale), Y(style.dots.size*scale));
         }
       }
@@ -384,9 +359,10 @@ class  Mosquito { //класс "москита"
     }
   }
   handler() { //метод обработчика
-    if (this.land.type == 8 && this.land.pow > rnd()) this.alive = false; //ландшафт "охотничья зона"
+    if (this.alive) {
+      if (this.land.type == 8 && this.land.pow > rnd()) this.alive = false; //ландшафт "охотничья зона"
     
-    if (this.alive) { //проверка заражения
+      //проверка заражения:
       for (let i = 0; i < arr.length; i++) { //проверка всех остальных клеток
         let p = arr[i];
         if (p.state != this.state && p.alive && (!this.st.group || this.st.group != p.st.group)) { //прверка "не мой ли это друг?"
@@ -396,25 +372,26 @@ class  Mosquito { //класс "москита"
             }
           }
         }
-      }
       
-      if (options.mosquitotime && this.time+options.mosquitotime < timeNow()) this.alive = false; //проверка "срока жизни"
-      
-      { //блок движения
-        let home = { minx: style.mosquitosize, miny: style.mosquitosize, maxx: options.size-(style.mosquitosize), maxy: options.size-(style.mosquitosize) };
-        
-        //движение:
-        this.x += this.speed.x;
-        this.y += this.speed.y;
-        
-        //проверка касания края:
-        if (this.x < home.minx) this.speed.x *=-1, this.x = home.minx;
-        if (this.x > home.maxx) this.speed.x *=-1, this.x = home.maxx;
-        if (this.y < home.miny) this.speed.y *=-1, this.y = home.miny;
-        if (this.y > home.maxy) this.speed.y *=-1, this.y = home.maxy;
-        
-        this.landscape();
+        if (options.mosquitotime && this.time+options.mosquitotime < timeNow()) this.alive = false; //проверка "срока жизни"
       }
+    }
+  }
+  move() { //метод движения
+    if (this.alive) {
+      let home = { minx: style.mosquitosize, miny: style.mosquitosize, maxx: options.size-(style.mosquitosize), maxy: options.size-(style.mosquitosize) };
+      
+      //движение:
+      this.x += this.speed.x;
+      this.y += this.speed.y;
+      
+      //проверка касания края:
+      if (this.x < home.minx) this.speed.x *=-1, this.x = home.minx;
+      if (this.x > home.maxx) this.speed.x *=-1, this.x = home.maxx;
+      if (this.y < home.miny) this.speed.y *=-1, this.y = home.miny;
+      if (this.y > home.maxy) this.speed.y *=-1, this.y = home.maxy;
+      
+      this.landscape();
     }
   }
   landscape() { //метод проверки ландшафта
@@ -423,15 +400,17 @@ class  Mosquito { //класс "москита"
     this.land.type = landscape.type[this.land.x][this.land.y];
     this.land.pow = landscape.pow[this.land.x][this.land.y];
   }
+  first() {}
+  end() {}
 }
 
 class Rat { //класс "крысы"
+  teleporto = Cell.prototype.teleporto;
+  lnd = Cell.prototype.lnd;
+  isInfectable = Cell.prototype.isInfectable;
   constructor(id, x, y, state) {
-    //установка позиции
-    this.x = x ?? random(options.size-style.ratsize)+(style.ratsize/2);
-    this.y = y ?? random(options.size-style.ratsize)+(style.ratsize/2);
-    
-    this.speed = { x: random(options.ratspeed)-(options.ratspeed/2), y: random(options.ratspeed)-(options.ratspeed/2) }; //установка скорости
+    this.initPos(x, y);
+    this.initSpeed();
     
     //инициализация:
     this.state = state ?? 0;
@@ -439,32 +418,42 @@ class Rat { //класс "крысы"
     this.alive = true;
     this.time = timeNow();
     this.st = states[this.state];
-    this.infectable = false;
     this.frame = this.state ? 0:false;
-    this.infect = this.st.infect ?? this.state;
-    this.infectable = this.st.zone && this.st.prob;
     this.type = "rat";
-    
-    //обновление счётчика:
-    counter.special++;
-    this.st.count.special++;
-    
+    this.isInfectable();
+    this.counterAdd(true);
     this.landscape();
+  }
+  initPos(x, y) { //установка позиции
+    this.x = x ?? random(options.size-style.ratsize)+(style.ratsize/2);
+    this.y = y ?? random(options.size-style.ratsize)+(style.ratsize/2);
+  }
+  initSpeed() { //установка скорости
+    this.speed = { x: random(options.ratspeed)-(options.ratspeed/2), y: random(options.ratspeed)-(options.ratspeed/2) };
+  }
+  counterAdd(birth) { //обновление счётчика
+    if (birth) counter.special++;
+    this.st.count.special++;
+  }
+  counterMin(dead) { //обновление счётчика
+    if (dead) counter.special--;
+    this.st.count.special--;
+  }
+  isEvent(rats) {
+    return rats ?? false;
   }
   toState(state) { //метод перехода в другое состояние
     if (this.alive) {
       let laststate = this.st;
+      this.counterMin();
       
-      //обновление счётчика:
-      this.st.count.special--;
       this.state = state;
-      
       this.time = timeNow();
       this.frame = frame;
       this.st = states[this.state];
       this.infect = this.st.infect ? this.st.infect-1:this.state;
       this.infectable = this.st.prob && this.st.zone;
-      this.st.count.special++; //обновление счётчика
+      this.counterAdd();
     }
   }
   dead() { //метод "смерти"
@@ -473,18 +462,15 @@ class Rat { //класс "крысы"
       this.time = timeNow();
       this.frame = frame;
       this.infectable = false;
-      
-      //обновление счётчика:
-      this.st.count.special--;
-      counter.special--;
+      this.counterMin(true);
     }
   }
   handler() { //метод обработчика
-    if (this.land.type == 8 && this.land.pow > rnd()) this.dead(); //ландшафт "охотничья зона"
-    if (this.alive && this.land.type == 15 && this.land.pow > rnd()) {
-        this.dead();
-        arr[this.id] = new Cell(this.id, this.x, this.y, this.state);
-      } //ландшафт "человечья зона"
+    if (this.lnd(8)) this.dead(); //ландшафт "охотничья зона"
+    if (this.alive && this.lnd(15)) {
+      this.dead();
+      arr[this.id] = new Cell(this.id, this.x, this.y, this.state);
+    } //ландшафт "человечья зона"
     
     if (this.infectable && this.frame !== frame) { //проверка заражения
       for (let i = 0; i < arr.length; i++) { //проверка всех клеток
@@ -514,37 +500,29 @@ class Rat { //класс "крысы"
       this.landscape();
     }
   }
+  trans() {
+    return (this.st.transparent ? 128:255);
+  }
+  fig(size, f, clr) {
+    f ??= x => x;
+    size ??= 1;
+    ctx.fillStyle = (clr ?? this.st.color) + ahex(f(this.trans()));
+    ctx.beginPath();
+    ctx.moveTo(X((this.x-(style.ratsize*size/2))*scale+15), Y((this.y+(style.ratsize*size/2))*scale+15));
+    ctx.lineTo(X((this.x+(style.ratsize*size/2))*scale+15), Y((this.y+(style.ratsize*size/2))*scale+15));
+    ctx.lineTo(X(this.x*scale+15), Y((this.y-(style.ratsize*size/2))*scale+15));
+    ctx.closePath();
+    ctx.fill();
+  }
   render() { //метод отрисовки на холсте
     if (!this.st.invisible) { //свойство "невидимка"
-      let fig = function(obj, size) {
-        let px = size*style.ratsize;
-        let l = px/2;
-        ctx.beginPath();
-        ctx.moveTo(X((obj.x-l)*scale+15), Y((obj.y+l)*scale+15));
-        ctx.lineTo(X((obj.x+l)*scale+15), Y((obj.y+l)*scale+15));
-        ctx.lineTo(X(obj.x*scale+15), Y((obj.y-l)*scale+15));
-        ctx.closePath();
-        ctx.fill();
-      };
       if (this.alive) {
-        let trans = this.st.transparent ? 128:255;
-        ctx.fillStyle = this.st.color + ahex(trans);
-        fig(this, 1);
-        if (frame < this.frame+5 && style.chanim && this.frame !== false) { //отрисовка перехода в другое состояние
-          let fram = frame-this.frame;
-          let cellTrans = this.st.transparent ? 128:255;
-          let trans = ahex(cellTrans*(5-fram)/10);
-          ctx.fillStyle = this.st.color + trans;
-          fig(this, 2);
-        }
+        this.fig();
+        if (frame < this.frame+5 && style.chanim && this.frame !== false) this.fig(2, x => x*(5-frame+this.frame)/10); //отрисовка перехода в другое состояние
       } else {
         if (frame < this.frame+15 && style.deadanim) { //отрисовка "смерти"
           let fram = frame-this.frame;
-          let size = fram/7.5+1;
-          let cellTrans = this.st.transparent ? 128:255;
-          let trans = ahex(cellTrans*(15-fram)/15);
-          ctx.fillStyle = this.st.color + trans;
-          fig(this, size);
+          this.fig(fram/7.5+1, x => x*(15-fram)/15);
         }
       }
     }
@@ -555,84 +533,23 @@ class Rat { //класс "крысы"
     this.land.type = landscape.type[this.land.x][this.land.y];
     this.land.pow = landscape.pow[this.land.x][this.land.y];
   }
-  first() {} //метод пре-отрисовки (пока не нужен)
-  end() {}  //метод конца обработки (пока не нужен)
+  first() {}
+  end() {}
 }
 
-class Ball { //класс "шара"
-    constructor(id, x, y, state) {
-    //установка позиции
-    this.x = x ?? random(options.size-style.ratsize)+(style.ratsize/2);
-    this.y = y ?? random(options.size-style.ratsize)+(style.ratsize/2);
-    
-    this.speed = { x: 0, y: 0 }; //установка скорости
-    
-    //инициализация:
-    this.state = state ?? 0;
-    this.id = id;
-    this.alive = true;
-    this.time = timeNow();
-    this.st = states[this.state];
-    this.infectable = false;
-    this.frame = this.state ? 0:false;
-    this.infect = this.st.infect ?? this.state;
-    this.infectable = this.st.zone && this.st.prob;
+class Ball extends Rat {
+  constructor(id, x, y, state) {
+    super(id, x, y, state);
     this.type = "ball";
-    
-    //обновление счётчика:
-    counter.special++;
-    this.st.count.special++;
-    
-    this.landscape();
   }
-  toState(state) { //метод перехода в другое состояние
+  teleporto(fx, fy, sx, sy, st) { //телепортация
+    Cell.prototype.teleporto.call(this, fx, fy, sx, sy, st, style.ballsize);
+  }
+  toState(state) {
+    super.toState(state);
     if (this.alive) {
-      let laststate = this.st;
-      
-      //обновление счётчика:
-      this.st.count.special--;
-      this.state = state;
-      
-      //"подскок":
       this.speed.x += -gravitation.x*10;
       this.speed.y += -gravitation.y*10;
-      
-      this.time = timeNow();
-      this.frame = frame;
-      this.st = states[this.state];
-      this.infect = this.st.infect ? this.st.infect-1:this.state;
-      this.infectable = this.st.prob && this.st.zone;
-      this.st.count.special++; //обновление счётчика
-    }
-  }
-  dead() { //метод "смерти"
-    if (this.alive) {
-      this.alive = false;
-      this.time = timeNow();
-      this.frame = frame;
-      this.infectable = false;
-      
-      //обновление счётчика:
-      this.st.count.special--;
-      counter.special--;
-    }
-  }
-  handler() { //метод обработчика
-    if (this.alive && this.land.type == 8 && this.land.pow > rnd()) this.dead(); //ландшафт "охотничья зона"
-    if (this.alive && this.land.type == 15 && this.land.pow > rnd()) {
-        this.dead();
-        arr[this.id] = new Cell(this.id, this.x, this.y, this.state);
-      } //ландшафт "человечья зона"
-    
-    if (this.infectable && this.frame !== frame) { //проверка заражения
-      for (let i = 0; i < arr.length; i++) { //проверка всех клеток
-        let p = arr[i];
-        if (p.state != this.infect && p.state != this.state && p.alive) { //проверка "не мой ли это друг?"
-          if (this.x-this.st.zone <= p.x && this.x+this.st.zone >= p.x && this.y-this.st.zone <= p.y && this.y+this.st.zone >= p.y) { //проверка зоны заражения
-            if (rnd() < this.st.prob && (p.st.protect ?? 0 /* свойство "защита" */) < rnd()) p.toState(this.infect); //проверка вероятности заражения
-          }
-        }
-      }
     }
   }
   move() { //метод движения
@@ -654,44 +571,14 @@ class Ball { //класс "шара"
       this.landscape();
     }
   }
-  render() { //метод отрисовки на холсте
-    if (!this.st.invisible) { //свойство "невидимка"
-      let fig = function(obj, size) {
-        ctx.beginPath();
-        ctx.arc(X(obj.x*scale+15), Y(obj.y*scale+15), X(size*style.ballsize/2), 0, Math.PI*2);
-        ctx.fill();
-      };
-      if (this.alive) {
-        let trans = this.st.transparent ? 128:255;
-        ctx.fillStyle = this.st.color + ahex(trans);
-        fig(this, 1);
-        if (frame < this.frame+5 && style.chanim && this.frame !== false) { //отрисовка перехода в другое состояние
-          let fram = frame-this.frame;
-          let cellTrans = this.st.transparent ? 128:255;
-          let trans = ahex(cellTrans*(5-fram)/10);
-          ctx.fillStyle = this.st.color + trans;
-          fig(this, 2);
-        }
-      } else {
-        if (frame < this.frame+15 && style.deadanim) { //отрисовка "смерти"
-          let fram = frame-this.frame;
-          let size = fram/7.5+1;
-          let cellTrans = this.st.transparent ? 128:255;
-          let trans = ahex(cellTrans*(15-fram)/15);
-          ctx.fillStyle = this.st.color + trans;
-          fig(this, size);
-        }
-      }
-    }
+  fig(size, f) {
+    f ??= x => x;
+    size ??= 1;
+    ctx.fillStyle = (this.st.color) + ahex(f(this.trans()));
+    ctx.beginPath();
+    ctx.arc(X(this.x*scale+15), Y(this.y*scale+15), X(size*style.ballsize/2), 0, Math.PI*2);
+    ctx.fill();
   }
-  landscape() { //метод проверки ландшафта
-    let px = options.size/landscape.res;
-    this.land = { x: Math.floor(this.x/px), y: Math.floor(this.y/px) };
-    this.land.type = landscape.type[this.land.x][this.land.y];
-    this.land.pow = landscape.pow[this.land.x][this.land.y];
-  }
-  first() {} //метод пре-отрисовки (пока не нужен)
-  end() {}  //метод конца обработки (пока не нужен)
 }
 
 class Robot { //класс робота
@@ -705,6 +592,7 @@ class Robot { //класс робота
     this.frame = false;
     this.alive = true;
     this.type = "robot";
+    this.home = { minx: style.botsize/2, miny: style.botsize/2, maxx: options.size-(style.botsize/2), maxy: options.size-(style.botsize/2) };
   }
   dead() { //метод "смерти"
     if (this.alive) {
@@ -716,46 +604,46 @@ class Robot { //класс робота
   handler() { //метод обработчика
     if (this.alive) {
       if (options.bottime && this.time+options.bottime < timeNow()) this.dead(); //проверка "срока поломки"
-    
+      
       for (let i = 0; i < arr.length; i++) { //проверка других клеток
         let p = arr[i];
         if (p.x <= this.x+options.botzone && p.x >= this.x-options.botzone && p.y <= this.y+options.botzone && p.y >= this.y-options.botzone) { //проверка зоны
           if (rnd() < options.botprob && rnd() >= (p.st.protect ?? 0)) p.dead();
         }
       }
-    
+    }
+  }
+  move() { //метод движения
+    if (this.alive) {
       //движение:
       this.x += this.speed.x;
       this.y += this.speed.y;
-    
-      let home = { minx: style.botsize/2, miny: style.botsize/2, maxx: options.size-(style.botsize/2), maxy: options.size-(style.botsize/2) };
+      
       //проверка касания края:
-      if (this.x < home.minx) this.speed.x *=-1, this.x = home.minx;
-      if (this.x > home.maxx) this.speed.x *=-1, this.x = home.maxx;
-      if (this.y < home.miny) this.speed.y *=-1, this.y = home.miny;
-      if (this.y > home.maxy) this.speed.y *=-1, this.y = home.maxy;
+      if (this.x < this.home.minx) this.speed.x *=-1, this.x = this.home.minx;
+      if (this.x > this.home.maxx) this.speed.x *=-1, this.x = this.home.maxx;
+      if (this.y < this.home.miny) this.speed.y *=-1, this.y = this.home.miny;
+      if (this.y > this.home.maxy) this.speed.y *=-1, this.y = this.home.maxy;
     }
   }
+  fig(size, a) {
+    size ??= 1;
+    ctx.fillStyle = (style.botcolor) + ahex(a ?? 255);
+    ctx.beginPath();
+    ctx.moveTo(X(this.x*scale+15), Y((this.y-style.botsize/2*size)*scale+15));
+    ctx.lineTo(X((this.x+style.botsize/2*size)*scale+15), Y(this.y*scale+15));
+    ctx.lineTo(X(this.x*scale+15), Y((this.y+style.botsize/2*size)*scale+15));
+    ctx.lineTo(X((this.x-style.botsize/2*size)*scale+15), Y(this.y*scale+15));
+    ctx.closePath();
+    ctx.fill();
+  }
   render() { //метод отрисовки
-    let fig = function(obj, size) {
-      ctx.beginPath();
-      ctx.moveTo(X(obj.x*scale+15), Y((obj.y-style.botsize/2*size)*scale+15));
-      ctx.lineTo(X((obj.x+style.botsize/2*size)*scale+15), Y(obj.y*scale+15));
-      ctx.lineTo(X(obj.x*scale+15), Y((obj.y+style.botsize/2*size)*scale+15));
-      ctx.lineTo(X((obj.x-style.botsize/2*size)*scale+15), Y(obj.y*scale+15));
-      ctx.closePath();
-      ctx.fill();
-    };
     if (this.alive) {
-      ctx.fillStyle = style.botcolor;
-      fig(this, 1);
+      this.fig();
     } else {
       if (frame < this.frame+15 && style.deadanim) { //отрисовка "смерти"
         let fram = frame-this.frame;
-        let size = fram/7.5+1;
-        let trans = 255*(1-fram/15);
-        ctx.fillStyle = style.botcolor + ahex(trans);
-        fig(this, size);
+        this.fig(fram/7.5+1, 255-(fram*17));
       }
     }
   }
@@ -763,81 +651,33 @@ class Robot { //класс робота
   end() {}  //метод конца обработки (пока не нужен)
 }
 
-class Cat { //класс кота
+class Cat extends Robot {
   constructor(id, x, y) {
-    //инициализация:
-    this.x = x ?? random(options.size-style.catsize)+(style.catsize/2);
-    this.y = y ?? random(options.size-style.catsize)+(style.catsize/2);
-    this.speed = { x: options.catspeed*(random(options.catspeed*2)-options.catspeed), y: options.catspeed*(random(options.catspeed*2)-options.catspeed) };
-    this.id = id;
-    this.time = timeNow();
-    this.frame = false;
-    this.alive = true;
+    super(id, x, y);
     this.type = "cat";
-    this.landscape();
+    this.home = { minx: style.catsize/2, miny: style.catsize/2, maxx: options.size-(style.catsize/2), maxy: options.size-(style.catsize/2) };
   }
-  dead() { //метод "смерти"
-    if (this.alive) {
-      this.alive = false;
-      this.time = timeNow();
-      this.frame = frame;
-    }
+  fig(size, a) {
+    size ??= 1;
+    ctx.fillStyle = (style.catcolor) + ahex(a ?? 255);
+    ctx.beginPath();
+    ctx.moveTo(X(this.x*scale+15), Y((this.y-style.catsize/2*size)*scale+15));
+    ctx.lineTo(X((this.x+style.catsize/2*size)*scale+15), Y(this.y*scale+15));
+    ctx.lineTo(X(this.x*scale+15), Y((this.y+style.catsize/2*size)*scale+15));
+    ctx.lineTo(X((this.x-style.catsize/2*size)*scale+15), Y(this.y*scale+15));
+    ctx.closePath();
+    ctx.fill();
   }
   handler() { //метод обработчика
-    if (this.alive && this.land.type == 8 && this.land.pow > rnd()) this.dead(); //ландшафт "охотничья зона"
     if (this.alive) {
       for (let i = 0; i < arr.length; i++) { //проверка других клеток
         let p = arr[i];
-        if (p.type == "rat" && p.x <= this.x+options.catzone && p.x >= this.x-options.catzone && p.y <= this.y+options.catzone && p.y >= this.y-options.catzone) { //проверка зоны
+        if (p.x <= this.x+options.catzone && p.x >= this.x-options.catzone && p.y <= this.y+options.catzone && p.y >= this.y-options.catzone && p.type == "rat") { //проверка зоны
           if (rnd() < options.catprob && rnd() >= (p.st.protect ?? 0)) p.dead();
         }
       }
-    
-      //движение:
-      this.x += this.speed.x;
-      this.y += this.speed.y;
-    
-      let home = { minx: style.catsize/2, miny: style.catsize/2, maxx: options.size-(style.catsize/2), maxy: options.size-(style.catsize/2) };
-      //проверка касания края:
-      if (this.x < home.minx) this.speed.x *=-1, this.x = home.minx;
-      if (this.x > home.maxx) this.speed.x *=-1, this.x = home.maxx;
-      if (this.y < home.miny) this.speed.y *=-1, this.y = home.miny;
-      if (this.y > home.maxy) this.speed.y *=-1, this.y = home.maxy;
-      this.landscape();
     }
   }
-  render() { //метод отрисовки
-    let fig = function(obj, size) {
-      ctx.beginPath();
-      ctx.moveTo(X(obj.x*scale+15), Y((obj.y-style.botsize/2*size)*scale+15));
-      ctx.lineTo(X((obj.x+style.botsize/2*size)*scale+15), Y(obj.y*scale+15));
-      ctx.lineTo(X((obj.x+style.botsize*0.3*size)*scale+15), Y((obj.y+style.botsize/2*size)*scale+15));
-      ctx.lineTo(X((obj.x-style.botsize*0.3*size)*scale+15), Y((obj.y+style.botsize/2*size)*scale+15));
-      ctx.lineTo(X((obj.x-style.botsize/2*size)*scale+15), Y(obj.y*scale+15));
-      ctx.closePath();
-      ctx.fill();
-    };
-    if (this.alive) {
-      ctx.fillStyle = style.catcolor;
-      fig(this, 1);
-    } else {
-      if (frame < this.frame+15 && style.deadanim) { //отрисовка "смерти"
-        let fram = frame-this.frame;
-        let size = fram/7.5+1;
-        let trans = 255*(1-fram/15);
-        ctx.fillStyle = style.catcolor + ahex(trans);
-        fig(this, size);
-      }
-    }
-  }
-  landscape() { //метод проверки ландшафта
-    let px = options.size/landscape.res;
-    this.land = { x: Math.floor(this.x/px), y: Math.floor(this.y/px) };
-    this.land.type = landscape.type[this.land.x][this.land.y];
-    this.land.pow = landscape.pow[this.land.x][this.land.y];
-  }
-  first() {} //метод пре-отрисовки (пока не нужен)
-  end() {}  //метод конца обработки (пока не нужен)
 }
 
 function frame_() { //метод обработки и отрисовки кадра
@@ -886,12 +726,8 @@ function frame_() { //метод обработки и отрисовки кад
     }
     
     if (!pause) {
-      for (let i = 0; i < arr.length; i++) { //обработка простых клеток и крыс
-        arr[i].handler();
-      }
-      for (let i = 0; i < spec.length; i++) { //обработка спец-клеток
-        spec[i].handler();
-      }
+      for (let i = 0; i < arr.length; i++) arr[i].handler(); //обработка простых клеток
+      for (let i = 0; i < spec.length; i++) spec[i].handler(); //обработка спец-клеток
       
       for (let i = 0; i < events.length; i++) { //обработка событий
         let e = events[i];
@@ -932,23 +768,16 @@ function frame_() { //метод обработки и отрисовки кад
       }
     }
     
-    for (let i = 0; i < arr.length; i++) { //отрисовка нижнего плана крыс и простых клеток
-      arr[i].first();
-    }
-    for (let i = 0; i < arr.length; i++) { //отрисовка крыс и простых клеток
-      arr[i].render();
-    }
-    for (let i = 0; i < spec.length; i++) { //отрисовка спец-клеток
-      spec[i].render();
-    }
+    for (let i = 0; i < arr.length; i++) arr[i].first(); //отрисовка нижнего планапростых клеток
+    for (let i = 0; i < spec.length; i++) spec[i].first(); //отрисовка нижнего плана спец-клеток
+    for (let i = 0; i < arr.length; i++) arr[i].render(); //отрисовка крыс и простых клеток
+    for (let i = 0; i < spec.length; i++) spec[i].render(); //отрисовка спец-клеток
     
     if (!pause) {
-      for (let i = 0; i < arr.length; i++) { //движение крыс и простых клеток
-        arr[i].move();
-      }
-      for (let i = 0; i < arr.length; i++) {
-        arr[i].end();
-      }
+      for (let i = 0; i < arr.length; i++) arr[i].move(); //движение простых клеток
+      for (let i = 0; i < spec.length; i++) spec[i].move(); //движение спец-клеток
+      for (let i = 0; i < arr.length; i++) arr[i].end(); //конец обработки простых клеток
+      for (let i = 0; i < spec.length; i++) spec[i].end(); //конец обработки спец-клеток
     }
     
     ctx.fillStyle = colors.elements;
@@ -1141,7 +970,7 @@ ${frames}`;
     scr.fillRect(X(590), Y(400), X(310), Y(50));
     scr.font = `${X(24)}px Monospace`;
     scr.fillStyle = colors.text;
-    scr.fillText("Epidemic Simulator 3", X(590), Y(430));
+    scr.fillText("Epidemic Simulator 4", X(590), Y(430));
     let url = s.toDataURL('image/png');
     let a = document.createElement('a');
     a.download = `epidemic_simulator_screenshot_${obj.name}.png`;
@@ -1157,14 +986,8 @@ ${frames}`;
       let p = arr[i];
       if (p.y >= y_-zone && p.y <= y_+zone && p.x >= x_-zone && p.x <= x_+zone) {
         if (p.alive) {
-          if (options.healto == -2) {
-            p.teleportated = { x: p.x, y: p.y, st: p.st, land: p.land };
-            p.frame = frame;
-            const size = p.type == "rat" ? style.ratsize:(p.type == "ball" ? style.ballsize:style.size);
-            p.x = testCordMinMax(random(zone*2)-zone+x_, size);
-            p.y = testCordMinMax(random(zone*2)-zone+y_, size);
-            p.landscape();
-          } else { 
+          if (options.healto == -2) p.teleporto(x_-zone, y_-zone, x_+zone, y_+zone);
+          else { 
             if (options.healto == -1) p.dead();
             else p.toState(options.healto ?? 0);
           }

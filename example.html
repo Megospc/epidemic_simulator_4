@@ -10,6 +10,9 @@
         let r = await f.json();
         let l = localStorage.getItem("epidemic_simulator_settings");
         r.options.showspeed = 1;
+        r.style.deadanim = true;
+        r.style.chanim = true;
+        r.style.anim = true;
         if (l) {
           let s = JSON.parse(l);
           if (navigator.vibrate && s.vibrate) r.options.vibrate = s.vibrate;
@@ -19,7 +22,7 @@
           r.options.musictype = s.musictype;
           r.options.graphmove = s.graphmove;
           r.options.biggraph = s.biggraph;
-        }
+        } else r.style.resolution = 1800;
         let e = p.get('edit');
         sessionStorage.setItem('epidemic_simulator_'+(e ? 'open':'json'), JSON.stringify(r));
         location.href = e ? 'index.html':'game.html?open=1';

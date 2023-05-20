@@ -1,4 +1,4 @@
-const version = "4.5.4"; //версия программы
+const version = "4.5.10"; //версия программы
 const fps = 30; //количество кадров в игровой секунде
 const lands = [ //массив цветов ландшафтов
   "#000000", //без ландшафта [0]
@@ -229,12 +229,12 @@ function startrender() { //отрисовка изначального окна
 }
 startrender();
 function fullScreen(e) { //метод полного экрана
-  if(e.requestFullscreen) {
-    e.requestFullscreen();
-  } else if(e.webkitrequestFullscreen) {
-    e.webkitRequestFullscreen();
-  } else if(e.mozRequestFullscreen) {
-    e.mozRequestFullScreen();
+  if(e.requestFullscreen) e.requestFullscreen();
+  else {
+    if(e.webkitrequestFullscreen) e.webkitRequestFullscreen();
+    else {
+      if(e.mozRequestFullscreen) e.mozRequestFullScreen();
+    }
   }
 }
 function sort() { //метод сортировки статистики
@@ -379,14 +379,15 @@ function graph() {
     }
   }
 }
-event.teleporto = function() { //событие "большой взмес"
+event.teleporto = function() { //событие "землетрясение"
   vib(50);
   event.splashcolor = "#ffffff";
   event.splash = frame;
   for (let i = 0; i < arr.length; i++) {
-    if (rnd() >= (arr[i].st.antievent ?? 0)) {
-      arr[i].x = random(options.size-style.size)+(style.size/2);
-      arr[i].y = random(options.size-style.size)+(style.size/2);
+    let p = arr[i];
+    if (p.isEvent()) {
+      p.x = random(options.size-style.size)+(style.size/2);
+      p.y = random(options.size-style.size)+(style.size/2);
     }
   }
 };
@@ -394,7 +395,8 @@ event.boom = function(e) { //событие "взрыв"
   if (e.pow) {
     vib(50);
     for (let i = 0; i < arr.length; i++) {
-      if (arr[i].type == "cell" && rnd() < e.pow && rnd() >= (arr[i].st.antievent ?? 0)) arr[i].dead();
+      let p = arr[i];
+      if (p.isEvent() && rnd() < e.pow) p.dead();
     }
   }
 };
@@ -404,8 +406,8 @@ event.rats = function(e) { //событие "крысиный всплеск"
     event.splashcolor = "#ffffff";
     event.splash = frame;
     for (let i = 0; i < arr.length; i++) {
-      if (arr[i].type == "cell" && rnd() <
-e.pow && rnd() >= (arr[i].st.antievent ?? 0)) {
+      let p = arr[i];
+      if (p.isEvent() && rnd() < e.pow) {
 	    arr[i].dead();
         arr[i] = new Rat(i, arr[i].x, arr[i].y, arr[i].state);
       }
@@ -420,7 +422,8 @@ event.epidemic = function(e) { //событие "эпидемия"
   if (e.pow) {
     vib(50);
     for (let i = 0; i < arr.length; i++) {
-      if (rnd() < e.pow && rnd() >= (arr[i].st.antievent ?? 0)) arr[i].toState(e.state == -1 ? Math.floor(random(states.length)):e.state);
+      let p = arr[i];
+      if (rnd() < e.pow && isEvent(true)) arr[i].toState(e.state == -1 ? Math.floor(random(states.length)):e.state);
     }
   }
 };
@@ -445,7 +448,8 @@ event.water = function(e) { //событие "наводнение"
   if (e.pow) {
     vib(50);
     for (let i = 0; i < arr.length; i++) {
-      if (arr[i].type == "cell" && rnd() < e.pow && rnd() >= (arr[i].st.antievent ?? 0) && arr[i].st.waterscary) arr[i].dead();
+      let p = arr[i];
+      if (p.isEvent() && rnd() < e.pow && arr[i].st.waterscary) p.dead();
     }
   }
 };
@@ -453,7 +457,8 @@ event.healer = function(e) { //событие "лекарство"
   if (e.pow) {
     vib(50);
     for (let i = 0; i < arr.length; i++) {
-      if (rnd() < e.pow && rnd() >= (arr[i].st.antievent ?? 0) && arr[i].state == e.state && arr[i].type == "cell") arr[i].toState(0);
+      let p = arr[i];
+      if (rnd() < e.pow && p.isEvent() && p.state == e.state) p.toState(0);
     }
   }
 };
@@ -463,7 +468,8 @@ event.night = function(e) { //событие "ночь"
   if (e.pow) {
     vib(50);
     for (let i = 0; i < arr.length; i++) {
-      if (arr[i].type == "cell" && rnd() < e.pow && rnd() >= (arr[i].st.antievent ?? 0) && arr[i].st.darkscary && (arr[i].land.type != 19 || arr[i].land.pow <= rnd())) arr[i].dead();
+      let p = arr[i];
+      if (p.isEvent() && rnd() < e.pow && p.st.darkscary && p.lnd(19)) p.dead();
     }
   }
 };
@@ -497,7 +503,8 @@ event.helloween = function(e) { //событие "хэллоуин"
   event.helloweened = frame;
   vib(50);
   for (let i = 0; i < arr.length; i++) {
-    if (arr[i].type == "cell" && rnd() >= (arr[i].st.antievent ?? 0) && arr[i].land.type == 24 && rnd() < arr[i].land.pow && !arr[i].st.brave) arr[i].dead();
+    let p = arr[i];
+    if (p.isEvent() && p.lnd(24) && !p.st.brave) p.dead();
   }
 };
 event.robots = function(e) {
@@ -520,6 +527,7 @@ event.show = function(e) { //событие "показ"
 event.eloff = function(e) { //событие "отключение электричества"
   vib(50);
   for (let i = 0; i < spec.length; i++) {
-    if (spec[i].type == "robot") spec[i].dead();
+    let p = spec[i];
+    if (p.type == "robot") p.dead();
   }
 };

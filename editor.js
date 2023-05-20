@@ -1,4 +1,4 @@
-const version = "4.5.4";
+const version = "4.5.10";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -189,6 +189,7 @@ const extensionlist = [
 - москиты
 - крысы
 - шары
+- волшебство
 
 События:
 - крысиный всплеск
@@ -301,7 +302,7 @@ for (let i = 0; i < extensionlist.length; i++) extensionlist[i].added = false;
     options.graphmove = saved.graphmove;
     $('biggraph').checked = saved.biggraph;
     options.biggraph = saved.biggraph;
-    if (saved.musictype) musictype();
+    musictype(saved.musictype);
   }
 }
 function landsUpdate() {
@@ -943,15 +944,15 @@ function readgame(json) {
               $(`event${i}type`).value = type;
               $(`event${i}time`).value = e.time/1000;
               if (ps[0]) {
-                 let num = e[ps[0].id];
+                let num = e[ps[0].id];
                 $(`event${i}prop0`).value = eval(`eval(\`${ps[0].aform}\`);`);
               }
               if (ps[1]) {
-                 let num = e[ps[1].id];
+                let num = e[ps[1].id];
                 $(`event${i}prop1`).value = eval(`eval(\`${ps[1].aform}\`);`);
               }
               if (ps[2]) {
-                 let num = e[ps[2].id];
+                let num = e[ps[2].id];
                 $(`event${i}prop2`).value = eval(`eval(\`${ps[2].aform}\`);`);
               }
               updateEvent(i);
@@ -1003,6 +1004,7 @@ function readgame(json) {
             setval('gravy', obj.options.gravitation.y ?? 3);
             setval('food', obj.options.food ?? 100);
             for (let i = 0; i < onc.length; i++) eval(onc[i]);
+            options = obj.options;
             landscape = {
               type: obj.landscape.type,
               pow: obj.landscape.pow,
@@ -1010,7 +1012,6 @@ function readgame(json) {
             };
             $('landres').value = landscape.res;
             landrender();
-            updateStates();
             log("Загрузка завершена");
             updateStates();
             setTimeout(() => { $('opengame').style.display='none'; $('editor').style.display='block'; }, 500);
@@ -1168,9 +1169,10 @@ function exadded(id) {
   }
   return true;
 }
-function musictype() {
-  options.musictype = options.musictype ? 0:1;
-  $('musictype').innerHTML = options.musictype ? '*':'';
+function musictype(i) {
+  if (typeof i == "number") options.musictype = i;
+  else options.musictype = (options.musictype+1)%3;
+  $('musictype').innerHTML = ["", "*", "°"][options.musictype];
   saveSets();
 }
 {
