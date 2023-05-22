@@ -131,7 +131,7 @@ class Cell { //основной класс
     if (this.lnd(9) && this.st.waterscary) this.dead(); //"морская зона"
     if (this.lnd(10, 1000)) explosion(); //"взрывоопасная зона"
     if (this.lnd(22) && event.ztime) this.z = event.z; //"трёхмерная зона"
-    if (this.lnd(16)) this.teleporto(0, options.size, 0, options.size); //"научная зона"
+    if (this.lnd(16)) this.teleporto(0, 0, options.size, options.size); //"научная зона"
     if (this.land.type == 26) this.food += this.land.pow*10; //"магазинная зона"
   }
   handler() { //метод обработчика
@@ -189,8 +189,8 @@ class Cell { //основной класс
                 break;
             }
           }
-          if (this.land.type == 24 && this.land.x == p.land.x && this.land.y == p.land.y && this.land.pow > rnd() && !p.st.brave && this.st.scary) p.dead(); //ландшафт "жуткая зона" и свойство "страшный"
-          if (((this.land.type == 3 && this.land.pow > rnd() && p.land.type == 3 && p.type == "cell") /* ландшафт "зона биологической опасности" */ || (this.x-this.st.zone <= p.x && this.x+this.st.zone >= p.x && this.y-this.st.zone <= p.y && this.y+this.st.zone >= p.y)) && ! (this.land.type == 14 && this.land.pow > rnd() && p.land.type == 14 && p.type == "cell") /* ландшафт "зона строгого контроля" */ && (this.z == p.z || this.st.thirdmetric || p.type != "cell")/* третье измерение */) { //проверка зоны заражения
+          if (this.lnd(24) && this.land.x == p.land.x && this.land.y == p.land.y && !p.st.brave && this.st.scary) p.dead(); //ландшафт "жуткая зона" и свойство "страшный"
+          if (((this.lnd(3) && p.land.type == 3 && p.type == "cell") /* ландшафт "зона биологической опасности" */ || (this.x-this.st.zone <= p.x && this.x+this.st.zone >= p.x && this.y-this.st.zone <= p.y && this.y+this.st.zone >= p.y)) && ! (this.lnd(14) && p.land.type == 14 && p.type == "cell") /* ландшафт "зона строгого контроля" */ && (this.z == p.z || this.st.thirdmetric || p.type != "cell")/* третье измерение */) { //проверка зоны заражения
             inzone++;
             if (this.st.stopping) p.speedc *= 1-this.st.stopping; //свойство "остановка"
             if (this.infectable) {
@@ -231,6 +231,7 @@ class Cell { //основной класс
   move() { //метод движения
     if (this.alive) {
       if (this.st.crazy/10 > rnd()) this.speed = { x: random(options.speed)-(options.speed/2), y: random(options.speed)-(options.speed/2) }; //свойство "сумасшедший"
+      if (this.st.zwalker > rnd()) this.z = Math.floor(random(5))-2; //свойство "странник"
       let c = this.land.type == 4 ? 1-(this.land.pow):(this.land.type == 17 ? this.land.pow+1:1); //ландшафты "пляжная зона" и "ледяная зона"
       
       if (this.st.robber && options.quar) this.initHome(true); //свойство "грабитель"
@@ -405,7 +406,6 @@ class  Mosquito { //класс "москита"
 }
 
 class Rat { //класс "крысы"
-  teleporto = Cell.prototype.teleporto;
   lnd = Cell.prototype.lnd;
   isInfectable = Cell.prototype.isInfectable;
   constructor(id, x, y, state) {
@@ -441,6 +441,9 @@ class Rat { //класс "крысы"
   }
   isEvent(rats) {
     return rats ?? false;
+  }
+  teleporto(fx, fy, sx, sy, st) { //телепортация
+    Cell.prototype.teleporto.call(this, fx, fy, sx, sy, st, style.ratsize);
   }
   toState(state) { //метод перехода в другое состояние
     if (this.alive) {
@@ -563,10 +566,10 @@ class Ball extends Rat {
       this.y += this.speed.y;
       
       //проверка касания края:
-      if (this.x < home.minx) this.speed.x *=-options.balljump, this.x = home.minx;
-      if (this.x > home.maxx) this.speed.x *=-options.balljump, this.x = home.maxx;
-      if (this.y < home.miny) this.speed.y *=-options.balljump, this.y = home.miny;
-      if (this.y > home.maxy) this.speed.y *=-options.balljump, this.y = home.maxy;
+      if (this.x < home.minx) this.speed.x *=-options.balljump*(1-rnd()*(options.ballrnd ?? 0.1)), this.x = home.minx;
+      if (this.x > home.maxx) this.speed.x *=-options.balljump*(1-rnd()*(options.ballrnd ?? 0.1)), this.x = home.maxx;
+      if (this.y < home.miny) this.speed.y *=-options.balljump*(1-rnd()*(options.ballrnd ?? 0.1)), this.y = home.miny;
+      if (this.y > home.maxy) this.speed.y *=-options.balljump*(1-rnd()*(options.ballrnd ?? 0.1)), this.y = home.maxy;
       
       this.landscape();
     }

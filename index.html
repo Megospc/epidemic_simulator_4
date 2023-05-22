@@ -17,7 +17,9 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body id="body">
-  <div id="editor">
+  <noscript id="noscript"><b>Похоже вы отключили JavaScript, пожалуйста включите его.</b></noscript>
+  <noscript><a href="help.html#noscript"><b>Подробнее</b></a></noscript>
+  <div id="editor" style="display: none;">
     <div id="top">
       <div><input type="text" id="name" value="без имени" onchange="window.name = this.value;">
       <button onclick="lssg();" id="lssg"><img src="assets/lssg.svg" height="15"></button></div>
@@ -114,6 +116,7 @@
         <div><input type="checkbox" id="graphmove" onchange="window.options.graphmove = this.checked; saveSets();">
         <label for="graphmove" class="label">Сдвиг графика</label></div>
         <div><p id="tosource" onclick="sessionStorage.setItem('epidemic_simulator_source', createJSON(2)); window.open('source.html');">Исходный код <img src="assets/source.svg" height="5"></p></div>
+        <div><p id="fullscreen" onclick="fullScreen(document.documentElement);">Полный экран</p></div>
         <div><div><label for="description" class="label">Описание:</label></div>
         <textarea id="description" onchange="window.description = this.value;"></textarea></div>
       </div>

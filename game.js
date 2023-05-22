@@ -1,4 +1,4 @@
-const version = "4.5.10"; //версия программы
+const version = "4.6.0"; //версия программы
 const fps = 30; //количество кадров в игровой секунде
 const lands = [ //массив цветов ландшафтов
   "#000000", //без ландшафта [0]
@@ -458,7 +458,7 @@ event.healer = function(e) { //событие "лекарство"
     vib(50);
     for (let i = 0; i < arr.length; i++) {
       let p = arr[i];
-      if (rnd() < e.pow && p.isEvent() && p.state == e.state) p.toState(0);
+      if (rnd() < e.pow /*&& p.isEvent(true) */&& p.state == e.state) p.toState(0);
     }
   }
 };

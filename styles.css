@@ -1,3 +1,13 @@
+#noscripthelp {
+  color: #0000ff;
+  font-family: Monospace, sans-serif;
+  font-size: 18px;
+}
+#noscript {
+  color: #a00000;
+  font-family: Monospace, sans-serif;
+  font-size: 18px;
+}
 #musictype {
   font-family: Monospace, sans-serif;
   width: 15px;
@@ -85,6 +95,10 @@
   resize: none;
 }
 #tosource {
+  font-family: Monospace, sans-serif;
+  font-size: 8px;
+}
+#fullscreen {
   font-family: Monospace, sans-serif;
   font-size: 8px;
 }

@@ -1,4 +1,4 @@
-const version = "4.5.10";
+const version = "4.6.0";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -56,7 +56,7 @@ const eventlist = [
   ], ext: "deads" },
   { name: "лекарство", id: "healer", props: [
     { id: "pow", text: "сила:", check: [0, 100, false], form: "${num}/100", aform: "${num}*100" },
-    { id: "state", text: "состояние:", check: [1, 'states.length', true], form: "${num}-1", aform: "${num}+1" }
+    { id: "state", text: "состояние:", check: [1, 'states.length', true], form: "${num}", aform: "${num}" }
   ] },
   { name: "ночь", id: "night", props: [
     { id: "pow", text: "сила:", check: [0, 100, false], form: "${num}/100", aform: "${num}*100" }
@@ -115,6 +115,7 @@ const props = [
   { title: "Ядовитое (%):", type: "num", id: "potion", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "deads" },
   { title: "Затраты (шт.):", type: "num", id: "eats", check: [0, 10, false], default: 0, form: "${num}", aform: "${num}" },
   { title: "Волшебство (%):", type: "num", id: "magic", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "cells" },
+  { title: "Странник (‰):", type: "num", id: "zwalker", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "move" },
   { title: "Грабитель", type: "chk", id: "robber", default: false },
   { title: "Все за одного", type: "chk", id: "allone", default: false, ext: "deads" },
   { title: "Невидимка", type: "chk", id: "invisible", default: false },
@@ -172,6 +173,7 @@ const extensionlist = [
 - сумасшедший
 - остановка
 - трёхмерный
+- странник
 
 События:
 - землетрясение
@@ -928,7 +930,7 @@ function readgame(json) {
             for (let i = 0; i < sels.length; i++) $(sels[i].id).value = sels[i].val;
             $('events').innerHTML = "";
             events = [];
-            lastevent = 0;
+            lastev = 0;
             for (let i = 0; i < obj.events.length; i++) {
               let e = obj.events[i];
               if (!exadded(e.ext)) {
@@ -1196,3 +1198,13 @@ if (sessionStorage.getItem("epidemic_simulator_open")) {
   readgame(sessionStorage.getItem("epidemic_simulator_open"));
   sessionStorage.setItem("epidemic_simulator_open", '');
 }
+function fullScreen(e) {
+  if(e.requestFullscreen) e.requestFullscreen();
+  else {
+    if(e.webkitrequestFullscreen) e.webkitRequestFullscreen();
+    else {
+      if(e.mozRequestFullscreen) e.mozRequestFullScreen();
+    }
+  }
+}
+$('editor').style.display = 'block';
