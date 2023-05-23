@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Симулятор Эпидемии 4 — Список ландшафтов</title>
+  <style>
+    h1, a {
+      font-family: Monospace, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h1>Список ландшафтов (версия: 2.0.0)</h1>
+</body>
+</html>
+<script>
+  const lands = [
+    "Отравленная зона", "#80a000",
+    "Санитарная зона", "#00a0a0",
+    "Зона биологической опасности", "#a000a0",
+    "Пляжная зона", "#a0a000",
+    "Зона повышенного заражения", "#a00000",
+    "Свалочная зона", "#605000",
+    "Аллергенная зона", "#f0a070",
+    "Охотничья зона", "#a00050"
+  ];
+  for (let i = 1, j = 0; j < lands.length; j += 2, i++) document.body.innerHTML += `  <div><a href="l${i}.html" style="color: ${lands[j+1]};"><b>${lands[j]}</b></a></div>`;
+</script>
