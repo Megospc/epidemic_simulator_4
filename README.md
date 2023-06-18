@@ -2,7 +2,7 @@
 ### **Добро пожаловать в «Симулятор Эпидемии 4»!**
 **«Симулятор Эпидемии»** — это модель представляющая взаимодействие болезний друг с другом.
 
-Версия: **4.6.0** (22.05.2023)
+Версия: **4.6.3** (18.06.2023)
 
 Запустить можно [тут ![](https://megospc.github.io/epidemic_simulator/assets/icon.svg "icon.svg")](https://megospc.github.io/epidemic_simulator_4 "GitHub Pages").
 
@@ -28,15 +28,27 @@
 ## Предыдущие версии:
 <u>**1.0.0** (06.02.2023)</u>
 
-<u>**1.3.0** (11.02.2023)</u>
+<u>**1.1.0** (11.02.2023)</u>
 
-<u>**1.3.9** (13.02.2023)</u>
+<u>**1.2.0** (14.02.2023)</u>
 
-[**1.4.2** (21.02.2023)](https://github.com/Megospc/epidemic_simulator "GitHub")[![](https://megospc.github.io/epidemic_simulator/assets/icon.svg "icon.svg")](https://megospc.github.io/epidemic_simulator "GitHub Pages")
+<u>**1.3.9** (17.02.2023)</u>
 
-<u>**2.1.8** (21.02.2023)</u>
+<u>**1.4.0** (18.02.2023)</u>
 
-<u>**2.2.3** (22.02.2023)</u>
+<u>**1.4.4** (19.02.2023)</u>
+
+[**1.5.2** (21.02.2023)](https://github.com/Megospc/epidemic_simulator "GitHub")[![](https://megospc.github.io/epidemic_simulator/assets/icon.svg "icon.svg")](https://megospc.github.io/epidemic_simulator "GitHub Pages")
+
+<u>**2.0.8** (21.02.2023)</u>
+
+<u>**2.1.6** (24.02.2023)</u>
+
+<u>**2.2.3** (25.02.2023)</u>
+
+<u>**2.3.0** (02.03.2023)</u>
+
+<u>**2.4.0** (07.03.2023)</u>
 
 <u>**2.5.8** (09.03.2023)</u>
 

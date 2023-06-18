@@ -1,4 +1,4 @@
-const version = "4.6.0"; //версия программы
+const version = "4.6.3"; //версия программы
 const fps = 30; //количество кадров в игровой секунде
 const lands = [ //массив цветов ландшафтов
   "#000000", //без ландшафта [0]
@@ -379,6 +379,13 @@ function graph() {
     }
   }
 }
+function HEXtoRGB(hex) {
+  let r = hex[1] + hex[2];
+  let g = hex[3] + hex[4];
+  let b = hex[5] + hex[6];
+  return [ Number("0x"+r), Number("0x"+g), Number("0x"+b) ];
+}
+
 event.teleporto = function() { //событие "землетрясение"
   vib(50);
   event.splashcolor = "#ffffff";

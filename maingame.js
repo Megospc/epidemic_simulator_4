@@ -59,10 +59,10 @@ class Cell { //основной класс
     this.landscape();
   }
   lnd(i, c) {
-    return this.land.type == i && this.land.type/(c ?? 1) > rnd();
+    return this.land.type == i && this.land.pow/(c ?? 1) > rnd();
   }
   isEvent() {
-    return this.st.antievnt <= rnd();
+    return this.st.antievent <= rnd();
   }
   toState(state, init) { //метод перехода в другое состояние
     if (this.alive && !(this.state && !init && this.lnd(27))) { //ландшафт "плесень"
@@ -199,7 +199,7 @@ class Cell { //основной класс
                 if (rnd() < killer) { //свойство "убийца"
                   p.dead();
                 } else {
-              	if (!event.quared) {
+              	if (!(event.quared && this.isEvent())) {
               	  if (rnd() < p.st.potion) this.dead();
                     if (this.st.magic > rnd()) {
                       p.dead();
@@ -684,6 +684,14 @@ class Cat extends Robot {
 }
 
 function frame_() { //метод обработки и отрисовки кадра
+  if (options.record) {
+    for (let i = 0; i < options.count; i++) {
+      record_byte(arr[i].state);
+      record_int(arr[i].x);
+      record_int(arr[i].y);
+      record_byte(Math.min(frame-arr[i].frame, 255));
+    }
+  }
   if (counter.cells+counter.special > 0 || !options.stop) {
     let FPS = Math.floor(10000/(performance.now()-lastTime))/10;
     let start = performance.now();
@@ -1005,6 +1013,21 @@ ${frames}`;
   }
 }
 function start() { //метод инициализации
+  recorded = [ 0x4d, 0x45, 0x53, 0x52 ];
+  if (states.length > 255) options.record = false;
+  if (options.record) {
+    record_int(options.size);
+    record_int(options.count);
+    record_byte(states.length);
+    for (let i = 0; i < states.length; i++) {
+      const c = HEXtoRGB(states[i].color);
+      record_byte(c[0]);
+      record_byte(c[1]);
+      record_byte(c[2]);
+      record_byte(states[i].transparent ? 128:255);
+    }
+  }
+  
   let rats = 0, cells = 0, balls = 0;
   
   //установка переменным изначальные значения:

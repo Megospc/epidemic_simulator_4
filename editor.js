@@ -1,4 +1,4 @@
-const version = "4.6.0";
+const version = "4.6.3";
 const lands = [
   { color: "#ffffff", bcolor: "#d0d0d0", name: "без ландшафта" },
   { color: "#80a000", bcolor: "#709000", name: "отравленная зона" },
@@ -91,7 +91,7 @@ const props = [
   { title: "Отдых (с):", type: "num", id: "rest", check: [0, 120, false], default: 0, form: "${num}*1000", aform: "${num}/1000", ext: "deads" },
   { title: "Телепорт (пкс.):", type: "num", id: "teleporto", check: [0, 420, false], default: 0, form: "${num}", aform: "${num}", ext: "move" },
   { title: "Москиты (шт.):", type: "num", id: "mosquito", check: [0, 3, true], default: 0, form: "${num}", aform: "${num}", ext: "cells" },
-  { title: "Убийца (%):", type: "num", id: "killer", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "attack"},
+  { title: "Убийца (%):", type: "num", id: "killer", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "attack" },
   { title: "Зона магнита (пкс.):", type: "num", id: "magnet", check: [0, 420, false], default: 0, form: "${num}", aform: "${num}", ext: "move" },
   { title: "Сила магнита:", type: "num", id: "magnetpow", check: [0, 12, false], default: 0, form: "${num}", aform: "${num}", ext: "move" },
   { title: "Тип магнита:", type: "sel", id: "magnettype", select: "arr = ['новый', 'только X', 'только Y', 'старый', 'старый X', 'старый Y'];", check: [0, 12, false], default: 0, form: "${num}", aform: "${num}", ext: "move" },
@@ -107,8 +107,8 @@ const props = [
   { title: "Сумасшедший (‰):", type: "num", id: "crazy", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "move" },
   { title: "Крысы (шт.):", type: "num", id: "ratinit", check: [0, 'options.ratcount-ratsum(n) ', true], default: 0, form: "${num}", aform: "${num}", firstno: true, ext: "cells" },
   { title: "Шары (шт.):", type: "num", id: "ballinit", check: [0, 'options.ballinit-ballsum(n)', true], default: 0, form: "${num}", aform: "${num}", firstno: true, ext: "cells" },
-  { title: "Воскрешение - время (с.):", type: "num", id: "relivetime", check: [0, 120, false], default: 0, form: "${num}*1000", aform: "${num}/1000", ext: "deads" },
-  { title: "Воскрешение - вероятность(%):", type: "num", id: "reliveprob", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "deads" },
+  { title: "Возрождение - время (с.):", type: "num", id: "relivetime", check: [0, 120, false], default: 0, form: "${num}*1000", aform: "${num}/1000", ext: "deads" },
+  { title: "Возрождение - вероятность(%):", type: "num", id: "reliveprob", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "deads" },
   { title: "Группа:", type: "num", id: "group", check: [0, 'states.length', true], default: 0, form: "${num}", aform: "${num}", ext: "attack" },
   { title: "Уязвимость (%):", type: "num", id: "defect", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "attack" },
   { title: "Остановка (%):", type: "num", id: "stopping", check: [0, 100, false], default: 0, form: "${num}/100", aform: "${num}*100", ext: "move" },
@@ -220,7 +220,7 @@ const extensionlist = [
 - паразит
 - инфекция после смерти
 - отдых
-- воскрешение
+- возрождение
 - ядовитое
 - все за одного
 - водобоязнь
@@ -276,7 +276,8 @@ var options = {
   catspeed: 2,
   catzone: 5,
   catprob: 0.05,
-  catcount: 0
+  catcount: 0,
+  record: false
 };
 var openedadd = [];
 var openedaddopt = false;

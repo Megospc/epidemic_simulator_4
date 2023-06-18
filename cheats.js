@@ -460,6 +460,9 @@ function cheat(str) {
         case "resolution?":
           res(style.resolution);
           break;
+        case "record":
+          if (options.record) download_record();
+          break;
         default:
           err(`Команда '${keys[0]}' не найдена.`);
       }
